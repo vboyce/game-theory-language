@@ -15,11 +15,6 @@ export default class customBreadcrumb extends React.Component {
             />
           </li>
           <li>
-            <Crumb
-              text={"Target " + (1 + round.get('targetNum')) +
-                    " / " + game.get('context').length}
-              className={Classes.BREADCRUMB_CURRENT}
-            />
           </li>
         </ul>
       </nav>

@@ -15,18 +15,25 @@ export default class Task extends React.Component {
       activeButton: false
     };
   }
-
+  renderPlayer(player, self = false) {
+    return (
+      <div className="player" key={player._id}>
+        <span className="name" style={{ color: player.get("nameColor") }}>
+          {self ? "Your choice" :  ""+player.get("name")+"'s choice "}
+        </span>
+      </div>
+    );
+  }
   render() {
     const { game, round, stage, player } = this.props;
-    const target = round.get("target");
-    const tangramURLs = player.get('tangramURLs');
-    const correct = player.get('clicked') == target
+    const targets = player.get("targets");
     let tangramsToRender;
-    if (tangramURLs) {
-      tangramsToRender = tangramURLs.map((tangram, i) => (
+    if (targets) {
+      tangramsToRender = targets.map((tangram, i) => (
         <Tangram
-          key={tangram}
-          tangram={tangram}
+          key={tangram.image}
+          image={tangram.image}
+          tangram={tangram.label}
           tangram_num={i}
           round={round}
           stage={stage}
@@ -34,30 +41,49 @@ export default class Task extends React.Component {
           player={player}
           />
       ));
+
     }
-      
-    let role = ""
-    if (stage.name=="selection"){
-     role = (player.get('role')=="speaker"? "You are the speaker. Please describe the picture in the box to the other players.": 
-    "You are a listener. Please click on the image that the speaker describes.")}
-    if (stage.name=="feedback"){
-      if (player.get('role')=='speaker'){
-        role = round.get("countCorrect")+"/"+(game.treatment.playerCount-1)+ " listeners selected correctly!"
-      }
-      else if (player.get("clicked")==target){
-        role = "Your selection is CORRECT!"
-      }
-      else if (player.get("clicked")==false){
-        role = "You did not make a selection."
-      }
-      else{
-        role = "Whoops, your selection was incorrect."
-      }
-    }
+    const otherPlayer = _.reject(game.players, p => p._id === player._id)[0]
+    const t1=targets[0]
+    const t2=targets[1]
+    let selfrole=player.get("role")
+    const payoffs=round.get("payoff")
+    const r11=payoffs[t1.label+t1.label][selfrole]
+    const r12=payoffs[t1.label+t2.label][selfrole]
+    const r21=payoffs[t2.label+t1.label][selfrole]
+    const r22=payoffs[t2.label+t2.label][selfrole]
+    const instr1 = stage.name=="selection" ? "Click on the treasure chest you want to open.":
+      "You got "+player.get("scoreIncrement")+ " points!"
     return (
       <div className="task">
         <div className="board">
-          <h1 className="roleIndicator"> {role}</h1>
+<table className="payoffTable">
+<tbody>
+<tr>
+<td className="empty"></td>
+    <td className="empty"></td>
+    <td  className="player" colSpan="2">{this.renderPlayer(otherPlayer)}</td>
+  </tr>
+  <tr>
+    <td className="empty"></td>
+    <td className="empty"></td>
+    <td className="target"><img src={t1.image} /></td>
+    <td className="target"><img src={t2.image} /></td>
+  </tr>
+  <tr>
+    <td className="player" rowSpan="2">{this.renderPlayer(player,true)}</td>
+    <td className="target"><img src={t1.image} /></td>
+    <td className="reward">{r11}</td>
+    <td className="reward">{r12}</td>
+  </tr>
+  <tr>
+    <td className="target"><img src={t2.image} /></td>
+    <td className="reward">{r21}</td>
+    <td className="reward">{r22}</td>
+  </tr>
+</tbody>
+</table>
+<h1 className="roleIndicator"> {instr1} </h1>
           <div className="all-tangrams">
             <div className="tangrams">
               {tangramsToRender}

@@ -1,6 +1,6 @@
 import Empirica from "meteor/empirica:core";
-import {names, avatarNames, nameColors} from './constants.js';
-import _ from "lodash";
+import {names, avatarNames, nameColors, targets, payoffs} from './constants.js';
+import _, { pick } from "lodash";
 
 // //// Avatar stuff //////
 
@@ -12,11 +12,10 @@ Empirica.onGameStart((game) => {
   console.debug("game ", game._id, " started");
 
   const roleList = game.get('roleList');
-  const targets = game.get('context');
+  //const targets = game.get('context');
 
   players.forEach((player, i) => {
-    player.set("tangramURLs", _.shuffle(targets));
-    player.set("roleList", roleList[player._id]);
+    player.set("role", roleList[player._id]);
     player.set("name", names[i]);
     player.set("avatar", `/avatars/jdenticon/${avatarNames[i]}`);
     player.set("nameColor", nameColors[i]);
@@ -29,16 +28,19 @@ Empirica.onGameStart((game) => {
 Empirica.onRoundStart((game, round) => {
   const players = game.players;
   round.set("chat", []); 
-  round.set("countCorrect",0);
-  round.set('speaker', "")
+  //round.set("countCorrect",0);
+  //round.set('speaker', "")
   round.set('submitted', false);
   players.forEach(player => {
-    player.set('role', player.get('roleList')[round.index])
-    if (player.get('role')=="speaker"){
-      round.set('speaker', player._id)
-    }
+    //player.set('role', player.get('roleList')[round.index])
+    // if (player.get('role')=="speaker"){
+    //   round.set('speaker', player._id)
+    // }
+    player.set("targets", _.shuffle(round.get("targets")));
+
     player.set('clicked', false);
     player.set('timeClick', false);
+    player.set("scoreIncrement",0)
   });
 });
 
@@ -61,26 +63,24 @@ Empirica.onStageStart((game, round, stage) => {
 Empirica.onStageEnd((game, round, stage) => {
   if (stage.name=="selection"){
     const players = game.players;
-    // Update player scores
-    players.forEach(player => {
-      const currScore = player.get("bonus") || 0;
-      if (player.get("role")=="speaker"){
-      player.set("bonus", round.get("countCorrect")*game.treatment.listenerBonus/(game.players.length-1)*.01 + currScore);
-      }
-      else{
-      const selectedAnswer = player.get("clicked");
-      const target = round.get('target');
-      const scoreIncrement = selectedAnswer == target ? game.treatment.listenerBonus*.01 : 0;
-      player.set("bonus", scoreIncrement + currScore);
-      }
-    });
+    const p1 = _.find(game.players, p => p.get('role') === "p1");
+    const p2 = _.find(game.players, p => p.get('role') === "p2");
+    //TODO what happens if someone doesn't click!!!!
+    if (p1.get("clicked") && p2.get("clicked")){
+    const outcome=p1.get("clicked")+p2.get("clicked")
+    console.log(outcome)
+    const payout=payoffs[outcome]
+    p1.set("scoreIncrement",payout.p1)
+    p2.set("scoreIncrement",payout.p2)
     //Save outcomes as property of round for later export/analysis
     players.forEach(player => {
-      const correctAnswer = round.get('target');
+      const currScore=player.get("bonus")
+      const scoreIncrement=player.get("scoreIncrement")
+      player.set("bonus", scoreIncrement*.01 + currScore);
       round.set('player_' + player._id + '_response', player.get('clicked'));
-      round.set('player_' + player._id+ '_correct', correctAnswer == player.get('clicked')); 
       round.set('player_' + player._id + '_time', player.get('timeClick'));
     });
+  }
 }
 });
 

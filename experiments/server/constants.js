@@ -1,21 +1,25 @@
 import Empirica from "meteor/empirica:core";
 
-export const targetSets = {
-  'setA' : [
-    "/experiment/tangram_A.png",
-    "/experiment/tangram_B.png",
-    "/experiment/tangram_C.png",
-    "/experiment/tangram_D.png",
-    "/experiment/tangram_E.png",
-    "/experiment/tangram_F.png",
-    "/experiment/tangram_G.png",
-    "/experiment/tangram_H.png",
-    "/experiment/tangram_I.png",
-    "/experiment/tangram_J.png",
-    "/experiment/tangram_K.png",
-    "/experiment/tangram_L.png",
-  ]
-};
+export const payoffs = {
+  "AA":{p1:5,p2:5},
+  "AB":{p1:0,p2:0},
+  "BA":{p1:0,p2:0},
+  "BB":{p1:3,p2:3}}
+
+export const targets =  [
+  "/experiment/tangram_A.png",
+  "/experiment/tangram_B.png",
+  "/experiment/tangram_C.png",
+  "/experiment/tangram_D.png",
+  "/experiment/tangram_E.png",
+  "/experiment/tangram_F.png",
+  "/experiment/tangram_G.png",
+  "/experiment/tangram_H.png",
+  "/experiment/tangram_I.png",
+  "/experiment/tangram_J.png",
+  "/experiment/tangram_K.png",
+  "/experiment/tangram_L.png",
+]
 
 export const names = [
     "Repi",

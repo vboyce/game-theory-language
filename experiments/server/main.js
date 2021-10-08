@@ -1,34 +1,27 @@
 import Empirica from "meteor/empirica:core";
 
 import "./callbacks.js";
-import { targetSets } from "./constants";
+import { payoffs, targets} from "./constants";
 import _ from "lodash";
 
 
-function createRoles(players, info) {
+function createRoles(players) {
   const l = _.shuffle(players);
-  let order=[]
-  if (info.rotate===false){
-    order=_.times(info.numBlocks, _.constant(0))
-  }else if (info.rotate===true) {
-    order=_.range(info.numBlocks).map(p => p % info.numPlayers)  }
-  const speaker=_.times(info.numTrialsPerBlock, _.constant("speaker"))
-  const listener=_.times(info.numTrialsPerBlock, _.constant("listener"))
-
-  let role_list=[]
-  _.times(info.numPlayers, player_num => {
-    let current=[]
-    _.times(info.numBlocks, block =>{
-      order[block]==player_num ?
-        current.push(...speaker):
-        current.push(...listener)
-    })
-    role_list.push(current)
-  })
-  const roles=_.zipObject(l,role_list);
+  const roles=_.zipObject(l,["p1","p2"]);
   console.log(roles);
   return roles;
 }
+
+function chooseTargets(targets){
+  //takes a list of flower objects, a list of utilties and a number to select
+  //returns the context
+  // if blinded, then each flower is labelled with which player won't its utils
+  const f=_.slice(_.shuffle(targets),0,2)
+  const labs=["A","B"]
+  const values=_.zipWith(f,labs, (a,b)=>_.assign({"image":a,"label":b}))
+  return values
+}
+
 
 
 // gameInit is where the structure of a game is defined.  Just before
@@ -48,37 +41,33 @@ Empirica.gameInit((game, treatment) => {
 
 
   // Sample whether to use tangram set A or set B
-  game.set("targetSet", 'setA'); 
-  game.set('context', targetSets['setA']);
-  const targets = game.get('context');
+  //game.set("targetSet", 'setA'); 
+  //game.set('context', targetSets['setA']);
+  //const targets = game.get('context');
   const reps = treatment.rounds;
-  const numTargets = targets.length;
-  const info = {
-    numTrialsPerBlock : numTargets,
-    numBlocks : reps,
-    numTotalTrials: reps * numTargets,
-    numPlayers: game.players.length,
-    rotate: treatment.rotateSpeaker,// change this!!!
-  };
+  //const numTargets = targets.length;
+  // const info = {
+  //   numTrialsPerBlock : numTargets,
+  //   numBlocks : reps,
+  //   numTotalTrials: reps * numTargets,
+  //   numPlayers: game.players.length,
+  //   rotate: treatment.rotateSpeaker,// change this!!!
+  // };
   
   // I use this to play the sound on the UI when the game starts
   game.set("justStarted", true);
 
   // Make role list
-    game.set('roleList', createRoles(_.map(game.players, '_id'), info));
+    game.set('roleList', createRoles(_.map(game.players, '_id')));
 
     // Loop through repetition blocks
     _.times(reps, repNum => {
-        mixed_targets=_.shuffle(targets)
-      // Loop through targets in block
-      _.times(numTargets, targetNum => {      
+        //mixed_targets=_.shuffle(targets)
+      // Loop through targets in block   
         const round = game.addRound();
-        round.set('target', mixed_targets[targetNum]);
-        round.set('targetNum', targetNum);
-        round.set('repNum', repNum);
-        round.set('trialNum', repNum * numTargets + targetNum);
-        round.set('numPlayers', game.players.length)
-                
+        round.set('targets', chooseTargets(targets));
+        round.set('payoff', payoffs);
+        round.set('repNum', repNum)        
         round.addStage({
           name: "selection",
           displayName: "Selection",
@@ -89,7 +78,6 @@ Empirica.gameInit((game, treatment) => {
           displayName: "Feedback",
           durationInSeconds: treatment.feedbackDuration
         });
-      });
     });
 });
 
