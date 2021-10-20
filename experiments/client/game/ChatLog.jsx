@@ -72,7 +72,6 @@ class Messages extends React.Component {
 
   render() {
     const { messages, player, game } = this.props;
-
     return (
       <div className="messages" ref={el => (this.messagesEl = el)}>
         {messages.length === 0 && game.treatment.chatEnabled ? (

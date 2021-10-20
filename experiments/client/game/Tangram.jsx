@@ -6,7 +6,7 @@ import _ from "lodash";
 export default class Tangram extends React.Component {
     
   handleClick = e => {
-    const { game, tangram, tangram_num, stage, player, round } = this.props;
+    const { messages, game, tangram, tangram_num, stage, player, round } = this.props;
     if (stage.name == 'selection' &
         player.get('clicked') === false) {
       player.set("clicked", tangram)

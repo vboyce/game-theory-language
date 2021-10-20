@@ -3,7 +3,6 @@ import React from "react";
 export default class Author extends React.Component {
   render() {
     const { player, self, type } = this.props;
-
     if(type == "message") {
       return (
       <div className="author">
@@ -13,11 +12,13 @@ export default class Author extends React.Component {
         </span>
       </div>
       );
-    } else {
+    }
+    else if(type=="selectionAlert") {
 
       return(<i> {self ? "You" : player.get("name")} selected a box. </i>)
 
     }
+    else { return ""} // This shouldn't happen
 
     
   }
