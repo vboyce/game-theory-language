@@ -11,8 +11,11 @@ export default class SocialInteractions extends React.Component {
         <img src={player.get("avatar")} />
         <span className="name" style={{ color: player.get("nameColor") }}>
           {player.get("name")}
-          {self ? " (You)" :  player.get("role")=="listener"? " (Listener)": " (Speaker)"}
+          {self ? " (You)" :  " (Partner)"}</span>
+          <span className="name" style={{ color: player.get("nameColor") }}>
+          ${(player.get("bonus")||0).toFixed(2)}
         </span>
+        
       </div>
     );
   }
@@ -52,7 +55,7 @@ export default class SocialInteractions extends React.Component {
         </div>
         
         
-        <ChatLog messages={messages} round={round} stage={stage} player={player} />
+        <ChatLog messages={messages} round={round} stage={stage} player={player} game={game}/>
       </div>
     );
   }

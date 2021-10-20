@@ -7,7 +7,7 @@ export const payoffs = {
   "BB":{p1:3,p2:3}}
 
 export const targets =  [
-  "/experiment/tangram_A.png",
+ /* "/experiment/tangram_A.png",
   "/experiment/tangram_B.png",
   "/experiment/tangram_C.png",
   "/experiment/tangram_D.png",
@@ -18,7 +18,15 @@ export const targets =  [
   "/experiment/tangram_I.png",
   "/experiment/tangram_J.png",
   "/experiment/tangram_K.png",
-  "/experiment/tangram_L.png",
+  "/experiment/tangram_L.png", */
+  "/experiment/aqua-crate.jpeg",
+  "/experiment/blue-crate.jpeg",
+  "/experiment/crate.jpeg",
+  "/experiment/green-crate.jpeg",
+  "/experiment/orange-crate.jpeg",
+  "/experiment/pink-crate.jpeg",
+  "/experiment/purple-crate.jpeg",
+  "/experiment/yellow-crate.jpeg",
 ]
 
 export const names = [

@@ -22,7 +22,21 @@ function chooseTargets(targets){
   return values
 }
 
-
+function createPDRewards(){
+  //sucker payoff fixed at 0
+  // other rewards on 1-9, but have to respect ordering win > coop > defect 
+  var a=_.slice(_.shuffle(_.range(1,10)),0,3).sort()
+  var coop=a[1]
+  var defect=a[0]
+  var win=a[2]
+  var payoffs={
+   "AA":{p1:coop,p2:coop},
+   "AB":{p1:0,p2:win},
+   "BA":{p1:win,p2:0},
+   "BB":{p1:defect,p2:defect}
+  }
+  return payoffs
+}
 
 // gameInit is where the structure of a game is defined.  Just before
 // every game starts, once all the players needed are ready, this
@@ -66,7 +80,7 @@ Empirica.gameInit((game, treatment) => {
       // Loop through targets in block   
         const round = game.addRound();
         round.set('targets', chooseTargets(targets));
-        round.set('payoff', payoffs);
+        round.set('payoffs', createPDRewards());
         round.set('repNum', repNum)        
         round.addStage({
           name: "selection",

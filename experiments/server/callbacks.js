@@ -69,7 +69,8 @@ Empirica.onStageEnd((game, round, stage) => {
     if (p1.get("clicked") && p2.get("clicked")){
     const outcome=p1.get("clicked")+p2.get("clicked")
     console.log(outcome)
-    const payout=payoffs[outcome]
+    const payout=round.get("payoffs")[outcome]
+    console.log(payout)
     p1.set("scoreIncrement",payout.p1)
     p2.set("scoreIncrement",payout.p2)
     //Save outcomes as property of round for later export/analysis

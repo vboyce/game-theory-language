@@ -15,14 +15,39 @@ export default class Task extends React.Component {
       activeButton: false
     };
   }
-  renderPlayer(player, self = false) {
+  renderPlayer(player, text, self = false) {
     return (
-      <div className="player" key={player._id}>
         <span className="name" style={{ color: player.get("nameColor") }}>
-          {self ? "Your choice" :  ""+player.get("name")+"'s choice "}
+         <b>{self ? "Your "+text :  player.get("name")+"'s "+text}</b>
         </span>
-      </div>
     );
+  }
+
+  renderPlayerName(player, self = false) {
+    return (
+        <span style={{ color: player.get("nameColor") }}>
+         <b> {self ? "you" : player.get("name")} </b>
+        </span>
+    );
+  }
+  renderReward(payoff, self, other){
+    return (
+    <div><b><span className="name" style={{ color: self.get("nameColor") }}>
+      {payoff[self.get("role")]  }
+      </span>
+      &nbsp;&nbsp;<span className="name" style={{ color: other.get("nameColor") }}>
+      {  payoff[other.get("role")]}
+      </span> </b></div>)
+  }
+  renderFeedback(self, other){
+    return(
+      <div>
+       <span className="name" style={{ color: self.get("nameColor") }}> You </span> got 
+       <span className="name" style={{ color: self.get("nameColor") }}> { self.get("scoreIncrement") } </span> point{self.get("scoreIncrement")==1?"":"s"}! 
+       <span className="name" style={{ color: other.get("nameColor") }}> { this.renderPlayerName(other)} </span> got 
+       <span className="name" style={{ color: other.get("nameColor") }}> { other.get("scoreIncrement") } </span> point{other.get("scoreIncrement")==1?"":"s"}.
+      </div>
+    )
   }
   render() {
     const { game, round, stage, player } = this.props;
@@ -47,22 +72,27 @@ export default class Task extends React.Component {
     const t1=targets[0]
     const t2=targets[1]
     let selfrole=player.get("role")
-    const payoffs=round.get("payoff")
-    const r11=payoffs[t1.label+t1.label][selfrole]
-    const r12=payoffs[t1.label+t2.label][selfrole]
-    const r21=payoffs[t2.label+t1.label][selfrole]
-    const r22=payoffs[t2.label+t2.label][selfrole]
-    const instr1 = stage.name=="selection" ? "Click on the treasure chest you want to open.":
+    let otherrole=otherPlayer.get("role")
+    const payoffs=round.get("payoffs")
+    const r11=this.renderReward(payoffs[t1.label+t1.label], player, otherPlayer)
+    const r12=this.renderReward(payoffs[t1.label+t2.label], player, otherPlayer)
+    const r21=this.renderReward(payoffs[t2.label+t1.label], player, otherPlayer)
+    const r22=this.renderReward(payoffs[t2.label+t2.label], player, otherPlayer)
+    const instr2 = stage.name=="selection" ? "Click on the box you want to open.":
       "You got "+player.get("scoreIncrement")+ " points!"
     return (
       <div className="task">
         <div className="board">
+        <h1 className="roleIndicator"> <p>The rewards depend on what boxes {this.renderPlayerName(player, true)}  and {this.renderPlayerName(otherPlayer)}
+        each choose, as shown in the table below.</p>
+        <p>{this.renderPlayer(player, "reward", true)} is shown first and then {this.renderPlayer(otherPlayer, "reward")}.</p></h1>
+    
 <table className="payoffTable">
 <tbody>
 <tr>
 <td className="empty"></td>
     <td className="empty"></td>
-    <td  className="player" colSpan="2">{this.renderPlayer(otherPlayer)}</td>
+    <td  className="player" colSpan="2">{this.renderPlayer(otherPlayer, "choice")}</td>
   </tr>
   <tr>
     <td className="empty"></td>
@@ -71,7 +101,7 @@ export default class Task extends React.Component {
     <td className="target"><img src={t2.image} /></td>
   </tr>
   <tr>
-    <td className="player" rowSpan="2">{this.renderPlayer(player,true)}</td>
+    <td className="player" rowSpan="2">{this.renderPlayer(player, "choice", true)}</td>
     <td className="target"><img src={t1.image} /></td>
     <td className="reward">{r11}</td>
     <td className="reward">{r12}</td>
@@ -83,7 +113,7 @@ export default class Task extends React.Component {
   </tr>
 </tbody>
 </table>
-<h1 className="roleIndicator"> {instr1} </h1>
+<h1 className="roleIndicator"> {stage.name=="selection" ?  "Click on the box you want to open." : this.renderFeedback(player, otherPlayer)}</h1>
           <div className="all-tangrams">
             <div className="tangrams">
               {tangramsToRender}

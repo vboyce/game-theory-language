@@ -7,10 +7,6 @@ export default class Tangram extends React.Component {
     
   handleClick = e => {
     const { game, tangram, tangram_num, stage, player, round } = this.props;
-    const speakerMsgs = _.filter(round.get("chat"), msg => {
-      return msg.role == 'speaker'    })
-    const speaker = _.find(game.players, p => p.get('role') === "speaker");
-    // only register click for listener and only after the speaker has sent a message
     if (stage.name == 'selection' &
         player.get('clicked') === false) {
       player.set("clicked", tangram)
@@ -19,6 +15,15 @@ export default class Tangram extends React.Component {
         round.set('submitted', true)
       }
       player.stage.submit()
+
+      round.append("chat", {
+        text: null,
+        playerId: player._id,
+        target: round.get('target'),
+        role: player.get('role'),
+        type: "selectionAlert",
+        time: Date.now()
+      });
 
     }
   };
@@ -54,7 +59,7 @@ export default class Tangram extends React.Component {
     if (stage.name=="feedback"){
       players.forEach(player => {
         if (player.get('clicked')==tangram){
-          feedback.push(<img src={player.get("avatar")} key="player" />)
+          feedback.push(<img src={player.get("avatar")} key={player.get("name")}/>)
         }
       })
     }
