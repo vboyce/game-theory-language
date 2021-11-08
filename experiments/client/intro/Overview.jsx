@@ -14,70 +14,37 @@ export default class Overview extends React.Component {
           <h1 className={"bp3-heading"}> Game Overview </h1>
 
           <p>
-            <b> Please read these instructions carefully! You will have to pass a quiz on how the game works before you can play!</b>
+            <b> Please read these instructions carefully!</b>
           </p>
           
           <p>
-            In this task, you will be assigned to a team with {treatment.playerCount -1} other {treatment.playerCount>2 ? "people ": "person "} 
-            (<strong>{treatment.playerCount} people including yourself!</strong>).
-            You will play a series of communication games with people on your team.
-            Everyone on your team will see the same set of pictures, which will look something like this:
+            You are going on a treasure hunt with one other player! You will see a series of choices between two boxes like this: 
           </p>
 
-          <div className="smallimage">
-            <center><img width="300px" src="/experiment/tangrams.PNG" /></center>
+          <div className="image">
+            <center><img src="/experiment/overview.png" /></center>
           </div>
 
           <p>
-            One of the people on the team will be randomly assigned the {" "}
-            <strong>Speaker</strong> role and the others will be assigned the {" "}
-            <strong>Listener</strong> role. {treatment.rotateSpeaker ? "The Speaker role will rotate to a new person each round.": "The same person will be the Speaker the entire game."}
-          </p>
-
-          <p>
-            If you are the Speaker, you will see a black box
-            secretly marking one of the pictures as the {" "} <strong>target</strong>.
-          </p>
-
-          <div className="smallimage">
-            <center><img width="300px" src="/experiment/target.PNG" /></center>
-          </div>
-
-          <p>
-            The Speaker's job is to send a description of the target through the chatbox
-            so that the Listeners are able to pick it out of the set. You can write whatever
-            description you think will best allow your partners to identify the target.
-            Please note that <b>the order of the pictures on your screen is scrambled</b>, so descriptions like "the one on the left" or "the third one" will not
-            work. Also, please limit your description to the current target picture: <strong> do not
-            discuss previous trials or chat about any other topics!</strong>
-          </p>
-
-          <div className="smallimage">
-            <center><img width="300px" src="/experiment/typing.PNG" /></center>
-            <br/>
-          </div>
-
-          <p>
-            After the Speaker sends a message, the Listeners will read it and 
-            <b> each click the picture they believe is the target</b>.  They are also
-            allowed to respond by sending messages back through the chatbox
-            until they are ready to make a selection. </p>
-
-          <button
-            type="button"
-            className="bp3-button bp3-intent-nope bp3-icon-double-chevron-left"
-            onClick={onPrev}
-            disabled={!hasPrev}
-          >
-            Previous
-          </button>
+            You will <b> chooose a box by clicking on it.</b> Once you choose a box, you can't switch. </p>
+            
+         <p> The <b>reward</b> you get from the box depends on <b>which box you choose AND which box your partner chooses!</b></p> 
+            
+            <p> To help you decide, <b>the rewards are shown in the table at the top</b>. Depending on what you choose (the row) and what your partner chooses (the column)
+              you and your partner will get the rewards shown in that square. <b>The reward you will get is shown first in your color. </b></p>
+              
+              <p>In the above example, 
+              if <b>you choose the yellow box and your partner also chooses the yellow box</b>, you each get <b>4 points</b>. If <b>you choose the green box and 
+              your partner chooses the yellow box</b>, you get <b>6 points</b> and your partner gets 0 points. </p>
+              
+            <p> <b>You can use the chat box on the left to communicate with your partner.</b></p>
+            
           <button
             type="button"
             className="bp3-button bp3-intent-primary"
             onClick={onNext}
-            disabled={!hasNext}
           >
-            Next
+            Continue
             <span className="bp3-icon-standard bp3-icon-double-chevron-right bp3-align-right"/>
           </button>
         </div>

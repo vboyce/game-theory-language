@@ -27,7 +27,7 @@ export default class Thanks extends React.Component {
           </p>
           <p>
             Thank you again for participating! If you were curious, you were always interacting in real time with real human partners.
-            The aim of our study was to understand how people cooperatively develop shorthand labels for new objects, sort of like how slang and dialects evolve in the real world. 
+            The aim of our study was to understand when people use language to coordinate or negotiate and what sort of language is used. 
             Please email us at <a href="mailto://languagecoglab@gmail.com."> languagecoglab@gmail.com</a> if you have any questions or concerns.
 
           </p>
