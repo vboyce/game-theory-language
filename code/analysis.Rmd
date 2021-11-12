@@ -5,9 +5,20 @@ output:
     toc: true
 ---
 
-#TODO
+# TODO
 - for less munging, put player role into round
 - put players increment into record!
+
+- Raise the stakes (game length / pay / bonus)
+
+Next pilot 
+- second page of instructions about bonus v base pay
+- 40 trials (~15 minutes) aim for $3-4 bonus 
+- can you have a get to know you at the beginning for 30-60 seconds? 
+- switch to stag hunt? or other coord game (BoS)
+
+- switch to BoS -- what are payoffs? (A,B; 0,0)
+
 # Pre-process
 
 ```{r set-up, include=F}
@@ -115,6 +126,8 @@ d.exit.survey <- read_csv(here(data_location, 'player-inputs.csv')) %>%
 ```
 
 # Metrics
+Paid $4 based on 20 minutes (including instructions, waiting, game, and end survey). 
+
 Welp, people definitely took the "click through" approach ...
 
 ```{r}
@@ -129,6 +142,13 @@ summary <- d.round_results %>% group_by(repNum, gameId) %>%
 
 summary
 
+```
+
+```{r}
+pairs <- d.round_results %>% select(playerId,gameId) %>% unique()
+d.players <- read_csv(here(data_location, 'players.csv')) %>% select(playerId=`_id`,data.bonus) %>% filter(!is.na(data.bonus)) %>% left_join(pairs) %>% arrange(gameId)
+
+d.players
 ```
 
 Not much talking, mostly one person
@@ -160,6 +180,12 @@ ggplot(outcome, aes(x=repNum, y=outcome, color=gameId))+geom_jitter(height=.1)
 # What do they say about the game
 
 ```{r}
-  read_csv(here(data_location,'exit.csv')) %>% select(playerId, gameId,human, workedWell, fair, chatUseful) %>% filter(!is.na(gameId))
+  comments <- read_csv(here(data_location,'exit.csv')) %>% select(playerId, gameId, human, workedWell, fair, chatUseful) %>% filter(!is.na(gameId)) %>% arrange(gameId)
+
+comments %>% select(playerId, human, workedWell)
+
+comments %>% select(playerId,fair)
+
+comments %>% select(playerId, chatUseful)
 
 ```

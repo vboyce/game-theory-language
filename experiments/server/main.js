@@ -38,6 +38,22 @@ function createPDRewards(){
   return payoffs
 }
 
+function createBoSRewards(){
+  //off diagonal fixed at 0
+  // other rewards on 2-9 symmetric
+  var a=_.slice(_.shuffle(_.range(2,10)),0,2).sort()
+  var best=a[1]
+  var okay=a[0]
+  var miss=0
+  var payoffs={
+   "AA":{p1:best,p2:okay},
+   "AB":{p1:miss,p2:miss},
+   "BA":{p1:miss,p2:miss},
+   "BB":{p1:okay,p2:best}
+  }
+  return payoffs
+}
+
 // gameInit is where the structure of a game is defined.  Just before
 // every game starts, once all the players needed are ready, this
 // function is called with the treatment and the list of players.  You
@@ -80,7 +96,7 @@ Empirica.gameInit((game, treatment) => {
       // Loop through targets in block   
         const round = game.addRound();
         round.set('targets', chooseTargets(targets));
-        round.set('payoffs', createPDRewards());
+        round.set('payoffs', createBoSRewards());
         round.set('repNum', repNum)        
         round.addStage({
           name: "selection",

@@ -31,7 +31,7 @@ Empirica.consent(Consent);
 // At this point they have been assigned a treatment. You can return
 // different instruction steps depending on the assigned treatment.
 Empirica.introSteps((game, treatment) => {
-  const steps = [Overview];
+  const steps = [Payment, Overview];
   
 
   return steps;

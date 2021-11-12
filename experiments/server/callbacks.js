@@ -62,6 +62,7 @@ Empirica.onStageStart((game, round, stage) => {
 // It receives the same options as onRoundEnd, and the stage that just ended.
 Empirica.onStageEnd((game, round, stage) => {
   if (stage.name=="selection"){
+    const scale=game.treatment.scale
     const players = game.players;
     const p1 = _.find(game.players, p => p.get('role') === "p1");
     const p2 = _.find(game.players, p => p.get('role') === "p2");
@@ -77,9 +78,11 @@ Empirica.onStageEnd((game, round, stage) => {
     players.forEach(player => {
       const currScore=player.get("bonus")
       const scoreIncrement=player.get("scoreIncrement")
-      player.set("bonus", scoreIncrement*.01 + currScore);
+      player.set("bonus", scoreIncrement*.01*scale + currScore);
       round.set('player_' + player._id + '_response', player.get('clicked'));
       round.set('player_' + player._id + '_time', player.get('timeClick'));
+      round.set('player_' + player._id + '_payoff', player.get('scoreIncrement'));
+      round.set('player_' + player._id + '_role', player.get('role'));
     });
   }
 }
