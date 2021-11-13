@@ -4,8 +4,8 @@ node_modules
 .DS_Store
 .Rproj.user
 experiments/tangram/local.json
-*/for_prolific.csv
-*/player_payments.csv
+for_prolific.csv
+player_payments.csv
 *.toc
 *.synctex.gz
 *.snm
