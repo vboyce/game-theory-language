@@ -1,23 +1,13 @@
 ---
-title: "Game Theory"
+title: "BoS pilot"
 output:
   html_document: 
     toc: true
 ---
 
 # TODO
-- for less munging, put player role into round
-- put players increment into record!
 
-- Raise the stakes (game length / pay / bonus)
-
-Next pilot 
-- second page of instructions about bonus v base pay
-- 40 trials (~15 minutes) aim for $3-4 bonus 
-- can you have a get to know you at the beginning for 30-60 seconds? 
-- switch to stag hunt? or other coord game (BoS)
-
-- switch to BoS -- what are payoffs? (A,B; 0,0)
+- why did time recording screw up for one group???
 
 # Pre-process
 
@@ -43,10 +33,10 @@ ParseJSONColumn <- function(x) {
 }
 
 ##Data import constants
-data_location="data/pilot211108"
+data_location="data/pilot211112"
 
 
-date_start=lubridate::ymd('2021-11-08')
+date_start=lubridate::ymd('2021-11-12')
 
 #image_location="write-ups/images"
 
@@ -56,12 +46,12 @@ date_start=lubridate::ymd('2021-11-08')
 ```{r bonus}
 ##This was for determining participant bonuses using the version of data with PID
 
-# d.players <- read_csv(here(data_location, 'players.csv')) %>% 
+# d.players <- read_csv(here(data_location, 'players.csv')) %>%
 #   rename(playerId=`_id`) %>%
-#   select(data.bonus, playerId,id) %>% 
+#   select(data.bonus, playerId,id) %>%
 #   mutate(bonus=round(data.bonus,2),
 #          bonus=bonus %|% 0,
-#          cost=round(5.33+bonus*4/3,2)) %>% 
+#          cost=round(3.33+bonus*4/3,2)) %>%
 #   write_csv(here(data_location, "player_payments.csv")) %>% select(id,bonus) %>% write_csv(here(data_location,"for_prolific.csv"))
 
 ```
@@ -108,7 +98,6 @@ d.round_results.raw <- read_csv(here(data_location,'rounds.csv'),guess_max=10000
   pivot_wider(names_from=label, names_prefix="box_", values_from=image) %>% 
     mutate(payoffs=map(payoffs, .f=ParseJSONColumn)) %>%
   unnest(payoffs) %>% 
-  left_join(d.players) %>% 
   mutate(AA=ifelse(role=="p1", AA.p1, AA.p2),
          AB=ifelse(role=="p1", AB.p1, AB.p2),
          BA=ifelse(role=="p1", BA.p1, BA.p2),
@@ -126,9 +115,9 @@ d.exit.survey <- read_csv(here(data_location, 'player-inputs.csv')) %>%
 ```
 
 # Metrics
-Paid $4 based on 20 minutes (including instructions, waiting, game, and end survey). 
+Paid $2.50 for 15 minutes with up to $4 bonus stated. 
 
-Welp, people definitely took the "click through" approach ...
+Something weird happened with time recording for Hy -- it shouldn't be possible to have times > 180 for each one, or > 120 total... Maybe it was just a time recording issue??
 
 ```{r}
 d.round_results <- read_csv(here(data_location,"raw_results.csv"))
@@ -143,6 +132,13 @@ summary <- d.round_results %>% group_by(repNum, gameId) %>%
 summary
 
 ```
+```{r}
+
+ggplot(d.round_results, aes(x=repNum, y=time, color=playerId))+geom_point()
+       
+```
+
+Some groups come close to maxxing bonuses
 
 ```{r}
 pairs <- d.round_results %>% select(playerId,gameId) %>% unique()
@@ -151,36 +147,62 @@ d.players <- read_csv(here(data_location, 'players.csv')) %>% select(playerId=`_
 d.players
 ```
 
-Not much talking, mostly one person
+Number of utterances 
 
 ```{r}
 chat <- read_csv(here(data_location, "raw_chat.csv")) %>% filter(!is.na(text))
 
-chat %>% select(gameId,playerId,repNum,text)
+chat %>% group_by(gameId, playerId) %>% tally() 
+
+```
+Looks like of the 5 groups:  3 talked (a little) / took longer / got more bonus and 2 didn't.
+
+When they talk
+
+```{r}
+chat %>% group_by(gameId, playerId, repNum) %>% tally() %>% filter(n>0) %>% 
+  ggplot(aes(x=repNum, y=playerId, color=gameId))+geom_point()
+
+```
+
+```{r}
+chat %>% mutate(gameId=str_sub(gameId, 0,2),playerId=str_sub(playerId, 0,2)) %>% 
+  select(gameId, playerId, repNum, text)
 
 ```
 
 # What do people choose
+   "AA":Best for P1
+   "BB":Best for P2
 
-win > coop > defect > 0
-   "AA":{p1:coop,p2:coop},
-   "AB":{p1:0,p2:win},
-   "BA":{p1:win,p2:0},
-   "BB":{p1:defect,p2:defect}
+Looks like there's convergence by 20 for the groups that converge, but it may not be obvious they have -- 40 rounds looks right. 
 
 ```{r}
 outcome <- d.round_results %>% select(gameId:repNum, response,role) %>% 
   pivot_wider(names_from=role, values_from=response) %>% 
   mutate(outcome=str_c(p1,p2))
 
-ggplot(outcome, aes(x=repNum, y=outcome, color=gameId))+geom_jitter(height=.1)
+ggplot(outcome, aes(x=repNum, y=outcome, color=gameId))+geom_jitter(height=.1)+facet_wrap(.~gameId)
+
+```
+
+Player 2 prefers option B, player 1 prefers action A. In one of the non-talky games, P2 usually choose their better one. 
+
+```{r}
+outcome <- d.round_results %>% select(gameId:repNum, response,role)
+
+ggplot(outcome, aes(x=role, fill=response))+geom_bar(position="dodge")+facet_wrap(.~gameId)
 
 ```
 
 # What do they say about the game
 
+
+... I guess maybe we do need a free chat at the beginning so people will think they're playing with another human...
+
+
 ```{r}
-  comments <- read_csv(here(data_location,'exit.csv')) %>% select(playerId, gameId, human, workedWell, fair, chatUseful) %>% filter(!is.na(gameId)) %>% arrange(gameId)
+  comments <- read_csv(here(data_location,'exit.csv')) %>% select(playerId, gameId, human, workedWell, fair, chatUseful) %>% mutate(gameId=str_sub(gameId, 0,2),playerId=str_sub(playerId, 0,2)) %>% filter(!is.na(gameId)) %>% arrange(gameId)
 
 comments %>% select(playerId, human, workedWell)
 
