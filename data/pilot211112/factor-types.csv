@@ -1,0 +1,8 @@
+﻿_id,name,required,description,type,min,max,createdAt,archivedAt
+NWqSa9dFtSZPCd7rP,playerCount,true,The Number of players participating in the given game.,Integer,1,,2021-10-26T00:17:26Z,
+oubFC8JR4ANaCoHQd,rounds,false,reps,Integer,0,1000,2021-10-26T00:57:35Z,
+BA7H73tQkEWRLTEDd,selectionDuration,false,in seconds,Integer,0,1000,2021-10-26T00:57:35Z,
+35Zk8gACoSRTYnQcS,feedbackDuration,false,in seconds,Integer,0,100,2021-10-26T00:57:35Z,
+M6qzzsyMbt86JGAeQ,chatEnabled,false,can you use chat?,Boolean,,,2021-10-26T00:57:35Z,
+ikipG5Trey3TZ4ASb,submitCode,false,for prolific,String,0,20,2021-11-08T18:56:46Z,
+uR3hqbNaW2YJSTQcd,scale,false,Factor to scale payments by,Number,0,20,2021-11-12T22:19:28Z,

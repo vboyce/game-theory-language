@@ -1,0 +1,11 @@
+﻿_id,playerId,gameId,createdAt,data.age,data.gender,data.language,data.raceWhite,data.raceBlack,data.raceAsian,data.raceNative,data.raceIslander,data.raceHispanic,data.education,data.correctness,data.human,data.workedWell,data.fair,data.chatUseful,data.feedback,data.time
+4fHowGrKycmErqbQX,Dd3H5DvYdDQJGCaXP,oKZdwR7zw8Yvj25wT,2021-11-12T22:30:25Z,20,Male,Spanish,,,,,,true,someCollege,yes,no,disagree,Yes ,I didnt use it ,No problems ,Yes 
+QPsWgDrK2CBmeSTq3,BSeugNZYoKLcMPEym,oKZdwR7zw8Yvj25wT,2021-11-12T22:30:26Z,21,Female,french,,,,,,,someCollege,no,no,neutral,,,,
+BsTBoRpwZ5jmfeL3K,b7yQYd9yFDjGvqD5x,6w3xMe8Sxid7QQYjy,2021-11-12T22:31:38Z,40,Male,English,true,,,,,,bachelor,yes,no,disagree,Yes,Didn't use it,No problems,Yes
+CmbEJobvh9eDXDPgN,uBrwQfjsJ32taCjd5,6w3xMe8Sxid7QQYjy,2021-11-12T22:32:07Z,21,Female,English,true,,,,,,someCollege,yes,no,neutral,yes,unsure as i didnt use it because i guessed the partner was a computer,no ,yes
+PHyn2xtymNJexreMC,HyAYoQc6SaAsPLRMG,uR4Zjdwby8j5kxxBM,2021-11-12T22:36:23Z,21,female,spanish,,,,,,true,bachelor,yes,yes,stronglyAgree,yes,yes,everything worked perfectly,yes
+MLazbh33edMBpBhpo,o9BQEnwK9mPZ7jK46,uR4Zjdwby8j5kxxBM,2021-11-12T22:36:31Z,42,female,English,true,,,,,,master,yes,yes,stronglyAgree,Yes,Yes,No,Yes
+qGrub7hcg29Zyqmmn,9KzxEKjPduYiBoEvK,5F2moNvN32P2kGoa9,2021-11-12T22:40:54Z,42,Female,English,true,,,,,,master,yes,yes,stronglyAgree,Totally and completely.,Yes very easy to use.,No it was fun.,Yes.
+FTL5JMr93T8Fmwt9S,AnLPrjGHwQcnJAJx6,5F2moNvN32P2kGoa9,2021-11-12T22:41:08Z,22,Male,Polish,true,,,,,,someCollege,yes,yes,stronglyAgree,Absolutely.,"Yes, there was no need for more.",Not really.,Way too much time to be honest.
+Po8vSWfsqMzZJGDYj,TTWhjiteFtwN9552j,HyGtCYGnkTLGJhndS,2021-11-12T22:44:19Z,30,Male,spanish,true,,,,,,someCollege,yes,no,agree,Sure,Yes. It was simple,No. Thank you.,Surely
+A8MQcBXeMbD5QCSmg,XhqREEJtcdPQkLHMZ,HyGtCYGnkTLGJhndS,2021-11-12T22:44:23Z,41,Male,English,true,,true,,,,someCollege,yes,no,agree,"Yes, I do. I should have communicated quicker. ",Yes it was very easy to use.,"No, it was all good. ",Yes plenty of time. 
