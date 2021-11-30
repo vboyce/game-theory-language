@@ -23,6 +23,8 @@ library(lme4)
 library(brms)
 library(rstan)
 library(viridis)
+library(knitr)
+
 rstan_options(auto_write = TRUE)
 options(mc.cores = parallel::detectCores())
 theme_set(theme_bw())
@@ -167,9 +169,10 @@ chat %>% group_by(gameId, playerId, repNum) %>% tally() %>% filter(n>0) %>%
 
 ```{r}
 chat %>% mutate(gameId=str_sub(gameId, 0,2),playerId=str_sub(playerId, 0,2)) %>% 
-  select(gameId, playerId, repNum, text)
+  select(gameId, playerId, repNum, text) %>% kable()
 
 ```
+
 
 # What do people choose
    "AA":Best for P1

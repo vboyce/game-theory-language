@@ -30,12 +30,14 @@ export default class ChatLog extends React.Component {
 
   render() {
     const { comment } = this.state;
-    const { messages, player, game } = this.props;
-    const inputDisplay = game.treatment.chatEnabled ? "" : "none";
+    const { messages, player, game, stage } = this.props;
+    const chat= game.treatment.chatEnabled || stage.name=="turing"
+
+    const inputDisplay = chat ? "" : "none";
     
     return (
       <div className="chat bp3-card">
-        <Messages game={game} messages={messages} player={player} />
+        <Messages game={game} messages={messages} player={player} stage={stage}/>
         <form onSubmit={this.handleSubmit}>
           <div className="bp3-control-group" style={{display:inputDisplay}} >
             <input
@@ -71,12 +73,13 @@ class Messages extends React.Component {
   }
 
   render() {
-    const { messages, player, game } = this.props;
+    const { messages, player, game, stage} = this.props;
+    const chat= game.treatment.chatEnabled || stage.name=="turing"
     return (
       <div className="messages" ref={el => (this.messagesEl = el)}>
-        {messages.length === 0 && game.treatment.chatEnabled ? (
+        {messages.length === 0 && chat ? (
           <div className="empty">No messages yet...</div>
-        ) : messages.length === 0 && !(game.treatment.chatEnabled) ? (
+        ) : messages.length === 0 && !(chat) ? (
           <div className="empty">No actions taken yet...</div>
         ) : null}
         {messages.map((message, i) => (

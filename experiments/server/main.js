@@ -90,6 +90,11 @@ Empirica.gameInit((game, treatment) => {
   // Make role list
     game.set('roleList', createRoles(_.map(game.players, '_id')));
 
+    const round=game.addRound()
+    round.addStage({ name: "turing",
+    displayName: "Chat",
+    durationInSeconds: treatment.turingDuration
+  })
     // Loop through repetition blocks
     _.times(reps, repNum => {
         //mixed_targets=_.shuffle(targets)

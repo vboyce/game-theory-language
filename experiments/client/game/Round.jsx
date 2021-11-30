@@ -2,6 +2,7 @@ import React from "react";
 
 import SocialInteractions from "./SocialInteractions.jsx";
 import Task from "./Task.jsx";
+import Turing from "./Turing.jsx";
 
 const roundSound = new Audio("experiment/round-sound.mp3");
 const gameSound = new Audio("experiment/bell.mp3");
@@ -42,11 +43,21 @@ export default class Round extends React.Component {
     } else {
       cancelTimeout(player);
     }
-    return (
-      <div className="round">
+    if (stage.name=="turing"){
+      return(
+        <div className="round">
         <SocialInteractions game={game} round={round} stage={stage} player={player} />
-        <Task game={game} round={round} stage={stage} player={player} />
+        <Turing game={game} round={round} stage={stage} player={player} />
       </div>
+      )
+    }
+    else{
+      return (
+        <div className="round">
+          <SocialInteractions game={game} round={round} stage={stage} player={player} />
+          <Task game={game} round={round} stage={stage} player={player} />
+        </div>
     );
-  }
+    }
+  } 
 }
