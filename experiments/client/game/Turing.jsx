@@ -38,16 +38,18 @@ export default class Turing extends React.Component {
     return (
       <div className="task">
         <div className="board">
-        <h1 className="turing"> <p>Before we start the game, take a few minutes to chat with your partner, {this.renderPlayerName(otherPlayer)}. </p>
-        <p>After this timer elapses, the game will start automatically. </p>
+        <h1 className="turing"> <p>Take a few minutes to chat with your partner, {this.renderPlayerName(otherPlayer)}. </p>
+        <p> This is just a chance for you to get to know one another because you will be playing together for the remainder of the game.</p> 
 
         <div className="list">
-        <p>You may have seen similar games where your parter is really a bot. This isn't one of those; you have been paired with another human participant. 
-        To convince you of this, you have a few minutes to chat with them. 
+        <p>You may have seen similar games where your parter is really a bot. This isn't one of those! 
+            You have been paired with another human participant who was also recruited from Prolific at the same time. 
+            We're going to start the game by giving you a few minutes to chat with your partner. 
         </p>
-            <p>Not sure what to talk about? Here are some options to get you started</p>
-            <ul text-align="left">
-  <li margin="auto">What the weather's like where you are</li>
+
+            <h3>Not sure what to talk about? Here are some options to get you started.</h3>
+            <ul>
+  <li>What the weather's like where you are</li>
   <li>Your favorite flavor of pie</li>
   <li>An animal you think looks silly</li>
 </ul> </div> </h1></div>

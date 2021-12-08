@@ -1,129 +1,123 @@
 treatments:
-  - name: pairRotate
+  - name: BoSpilot2
     factorIds:
-      - xWQjpcmpuWmZXGA7Q
-      - pWeADdnYht6s2XmXy
-      - PhWBYRyqGv7hpZbKm
-      - bMLyzSZu2NMqPxMp3
-      - XxGKfzAdshtarMJ8v
-      - ivrbpviGCdXTDsEiZ
-      - zvEroQHdTehMmuyqf
-  - name: quadRotate
+      - Y4n3qhKoeq4zhJM7j
+      - Gh2rD5yXcdPNSJ33F
+      - FEFRwnPwLHhYCD2hp
+      - szoQvyeBFJtD3bkAd
+      - Ck939g7C5nwMzfGo9
+      - 9ehWEoaCiFP7G7oWN
+      - gH3kSrDqrmT3Tot3o
+      - SyoMcXXQzA43ownGc
+  - name: BoSpilotsilent
     factorIds:
-      - xWQjpcmpuWmZXGA7R
-      - pWeADdnYht6s2XmXy
-      - PhWBYRyqGv7hpZbKm
-      - bMLyzSZu2NMqPxMp3
-      - XxGKfzAdshtarMJ8v
-      - ivrbpviGCdXTDsEiZ
-      - zvEroQHdTehMmuyqf
-  - name: trioRotate
-    factorIds:
-      - xWQjpcmpuWmZXGA7P
-      - pWeADdnYht6s2XmXy
-      - PhWBYRyqGv7hpZbKm
-      - bMLyzSZu2NMqPxMp3
-      - XxGKfzAdshtarMJ8v
-      - ivrbpviGCdXTDsEiZ
-      - zvEroQHdTehMmuyqf
+      - Y4n3qhKoeq4zhJM7j
+      - Gh2rD5yXcdPNSJ33F
+      - FEFRwnPwLHhYCD2hp
+      - szoQvyeBFJtD3bkAd
+      - PepMakdXcmDjFDGPd
+      - 9ehWEoaCiFP7G7oWN
+      - gH3kSrDqrmT3Tot3o
+      - SyoMcXXQzA43ownGc
 factorTypes:
-  - _id: eccB2RajWGC4kcWQH
+  - _id: uHfhghtEwZziux7D8
     name: playerCount
     description: The Number of players participating in the given game.
     required: true
     type: Integer
     min: 1
-  - _id: kJddTH8X4Y6Df7SPA
-    name: selectionDuration
-    description: >-
-      how many seconds do participants have to complete a tangram selection
-      trial
-    required: true
-    type: String
-  - _id: oTmtc6KmQb77CaDTC
-    name: submitCode
-    description: code for submission to prolific/mturk
-    required: true
-    type: String
-  - _id: uWvpQqxyNi8Dz6CSn
+  - _id: oubFC8JR4ANaCoHQd
     name: rounds
-    description: number of rounds
+    description: reps
     required: false
     type: Integer
-    min: 1
-  - _id: tJ642Av4buu8Q5w73
+    min: 0
+    max: 1000
+  - _id: BA7H73tQkEWRLTEDd
+    name: selectionDuration
+    description: in seconds
+    required: false
+    type: Integer
+    min: 0
+    max: 1000
+  - _id: 35Zk8gACoSRTYnQcS
     name: feedbackDuration
-    description: how many seconds the feedback is displayed for
+    description: in seconds
     required: false
     type: Integer
-    min: 1
+    min: 0
     max: 100
-  - _id: ZkXeabrJhX4KfX8yj
-    name: listenerBonus
-    description: how much a listener is paid per correct answer (in cents)
-    required: false
-    type: Integer
-    min: 1
-    max: 10
-  - _id: PbMKWFHGq7qHwK6NL
-    name: rotateSpeaker
-    description: is there one speaker for the whole game or does it rotate
+  - _id: M6qzzsyMbt86JGAeQ
+    name: chatEnabled
+    description: can you use chat?
     required: false
     type: Boolean
-    min: 2
+  - _id: ikipG5Trey3TZ4ASb
+    name: submitCode
+    description: for prolific
+    required: false
+    type: String
+    min: 0
+    max: 20
+  - _id: uR3hqbNaW2YJSTQcd
+    name: scale
+    description: Factor to scale payments by
+    required: false
+    type: Number
+    min: 0
+    max: 20
+  - _id: K3gC4XkPePZNhoctg
+    name: turingDuration
+    description: how long initial get to know you chat is
+    required: false
+    type: Integer
+    min: 0
+    max: 1000
 factors:
-  - _id: xWQjpcmpuWmZXGA7P
-    name: Triad
+  - _id: Y4n3qhKoeq4zhJM7j
+    name: '2'
+    value: 2
+    factorTypeId: uHfhghtEwZziux7D8
+  - _id: unc4YJsyGSfHZ5xnL
+    name: '20'
+    value: 20
+    factorTypeId: oubFC8JR4ANaCoHQd
+  - _id: FEFRwnPwLHhYCD2hp
+    name: '180'
+    value: 180
+    factorTypeId: BA7H73tQkEWRLTEDd
+  - _id: ExGyqo24cvXdSua6D
+    name: '3'
     value: 3
-    factorTypeId: eccB2RajWGC4kcWQH
-  - _id: xWQjpcmpuWmZXGA7Q
-    name: Pair
-    value: 2
-    factorTypeId: eccB2RajWGC4kcWQH
-  - _id: xWQjpcmpuWmZXGA7R
-    name: Quad
-    value: 4
-    factorTypeId: eccB2RajWGC4kcWQH
-  - _id: WPMyAs4AHQkRbejSw
-    name: One
-    value: 1
-    factorTypeId: uWvpQqxyNi8Dz6CSn
-  - _id: bMLyzSZu2NMqPxMp3
-    name: Six
-    value: 6
-    factorTypeId: uWvpQqxyNi8Dz6CSn
-  - _id: XxGKfzAdshtarMJ8v
-    name: five
-    value: 5
-    factorTypeId: tJ642Av4buu8Q5w73
-  - _id: ivrbpviGCdXTDsEiZ
-    name: Four
-    value: 4
-    factorTypeId: ZkXeabrJhX4KfX8yj
-  - _id: hsiunZ8b68hKxbnPM
-    name: Two
-    value: 2
-    factorTypeId: b5miCkhM6uwYKF2Sn
-  - _id: pWeADdnYht6s2XmXy
-    name: threemin
-    value: '180'
-    factorTypeId: kJddTH8X4Y6Df7SPA
-  - _id: wsDuqNzmgXecXtHLR
-    name: Pair
-    value: 6
-    factorTypeId: b5miCkhM6uwYKF2Sn
-  - _id: zvEroQHdTehMmuyqf
+    factorTypeId: 35Zk8gACoSRTYnQcS
+  - _id: Ck939g7C5nwMzfGo9
     name: 'true'
     value: true
-    factorTypeId: PbMKWFHGq7qHwK6NL
-  - _id: Wj7Mr5Npee9zFp8pr
+    factorTypeId: M6qzzsyMbt86JGAeQ
+  - _id: PepMakdXcmDjFDGPd
     name: 'false'
     value: false
-    factorTypeId: PbMKWFHGq7qHwK6NL
-  - _id: STrYPy3iToz6XDo9d
-    name: May4
-    value: 63E387C3
-    factorTypeId: oTmtc6KmQb77CaDTC
+    factorTypeId: M6qzzsyMbt86JGAeQ
+  - _id: 9ehWEoaCiFP7G7oWN
+    name: nov8
+    value: 779220FA
+    factorTypeId: ikipG5Trey3TZ4ASb
+  - _id: szoQvyeBFJtD3bkAd
+    name: '5'
+    value: 5
+    factorTypeId: 35Zk8gACoSRTYnQcS
+  - _id: Gh2rD5yXcdPNSJ33F
+    name: '40'
+    value: 40
+    factorTypeId: oubFC8JR4ANaCoHQd
+  - _id: gH3kSrDqrmT3Tot3o
+    name: '2'
+    value: 2
+    factorTypeId: uR3hqbNaW2YJSTQcd
+  - _id: SyoMcXXQzA43ownGc
+    name: '180'
+    value: 180
+    factorTypeId: K3gC4XkPePZNhoctg
 lobbyConfigs:
   - timeoutType: lobby
     timeoutInSeconds: 300
