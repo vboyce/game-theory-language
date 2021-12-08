@@ -44,7 +44,6 @@ export default class Turing extends React.Component {
         <div className="list">
         <p>You may have seen similar games where your parter is really a bot. This isn't one of those! 
             You have been paired with another human participant who was also recruited from Prolific at the same time. 
-            We're going to start the game by giving you a few minutes to chat with your partner. 
         </p>
 
             <h3>Not sure what to talk about? Here are some options to get you started.</h3>
