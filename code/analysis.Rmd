@@ -7,8 +7,6 @@ output:
 
 # TODO
 
-- why did time recording screw up for one group???
-
 # Pre-process
 
 ```{r set-up, include=F}
@@ -35,10 +33,10 @@ ParseJSONColumn <- function(x) {
 }
 
 ##Data import constants
-data_location="data/pilot211112"
+data_location="data/pilot211209"
 
 
-date_start=lubridate::ymd('2021-11-12')
+date_start=lubridate::ymd('2021-12-09')
 
 #image_location="write-ups/images"
 
@@ -53,7 +51,7 @@ date_start=lubridate::ymd('2021-11-12')
 #   select(data.bonus, playerId,id) %>%
 #   mutate(bonus=round(data.bonus,2),
 #          bonus=bonus %|% 0,
-#          cost=round(3.33+bonus*4/3,2)) %>%
+#          cost=round(bonus*4/3,2)) %>%
 #   write_csv(here(data_location, "player_payments.csv")) %>% select(id,bonus) %>% write_csv(here(data_location,"for_prolific.csv"))
 
 ```
@@ -119,7 +117,7 @@ d.exit.survey <- read_csv(here(data_location, 'player-inputs.csv')) %>%
 # Metrics
 Paid $2.50 for 15 minutes with up to $4 bonus stated. 
 
-Something weird happened with time recording for Hy -- it shouldn't be possible to have times > 180 for each one, or > 120 total... Maybe it was just a time recording issue??
+Sigh for those couple games.
 
 ```{r}
 d.round_results <- read_csv(here(data_location,"raw_results.csv"))
@@ -136,7 +134,7 @@ summary
 ```
 ```{r}
 
-ggplot(d.round_results, aes(x=repNum, y=time, color=playerId))+geom_point()
+#ggplot(d.round_results, aes(x=repNum, y=time, color=playerId))+geom_point()
        
 ```
 
@@ -151,13 +149,21 @@ d.players
 
 Number of utterances 
 
+pre-chat -- really we want word count not utterances, but eh. 
+From skimming people do talk some. 
 ```{r}
-chat <- read_csv(here(data_location, "raw_chat.csv")) %>% filter(!is.na(text))
+#this is a sloppy way to split, but eh, 
+chat <- read_csv(here(data_location, "raw_chat.csv")) %>% filter(!is.na(text)) %>% filter(is.na(targets))
 
-chat %>% group_by(gameId, playerId) %>% tally() 
+chat %>% group_by(gameId, playerId) %>% tally()
+```
+
+```{r}
+chat <- read_csv(here(data_location, "raw_chat.csv")) %>% filter(!is.na(text)) %>% filter(!is.na(targets))
+
+chat %>% group_by(gameId, playerId) %>% tally() %>% full_join(d.players)
 
 ```
-Looks like of the 5 groups:  3 talked (a little) / took longer / got more bonus and 2 didn't.
 
 When they talk
 
@@ -166,12 +172,8 @@ chat %>% group_by(gameId, playerId, repNum) %>% tally() %>% filter(n>0) %>%
   ggplot(aes(x=repNum, y=playerId, color=gameId))+geom_point()
 
 ```
+(Full chat transcript at bottom)
 
-```{r}
-chat %>% mutate(gameId=str_sub(gameId, 0,2),playerId=str_sub(playerId, 0,2)) %>% 
-  select(gameId, playerId, repNum, text) %>% kable()
-
-```
 
 
 # What do people choose
@@ -189,7 +191,7 @@ ggplot(outcome, aes(x=repNum, y=outcome, color=gameId))+geom_jitter(height=.1)+f
 
 ```
 
-Player 2 prefers option B, player 1 prefers action A. In one of the non-talky games, P2 usually choose their better one. 
+Player 2 prefers option B, player 1 prefers action A. 
 
 ```{r}
 outcome <- d.round_results %>% select(gameId:repNum, response,role)
@@ -201,8 +203,6 @@ ggplot(outcome, aes(x=role, fill=response))+geom_bar(position="dodge")+facet_wra
 # What do they say about the game
 
 
-... I guess maybe we do need a free chat at the beginning so people will think they're playing with another human...
-
 
 ```{r}
   comments <- read_csv(here(data_location,'exit.csv')) %>% select(playerId, gameId, human, workedWell, fair, chatUseful) %>% mutate(gameId=str_sub(gameId, 0,2),playerId=str_sub(playerId, 0,2)) %>% filter(!is.na(gameId)) %>% arrange(gameId)
@@ -212,5 +212,12 @@ comments %>% select(playerId, human, workedWell)
 comments %>% select(playerId,fair)
 
 comments %>% select(playerId, chatUseful)
+
+```
+# Chat
+
+```{r}
+read_csv(here(data_location, "raw_chat.csv")) %>% filter(!is.na(text)) %>% mutate(gameId=str_sub(gameId, 0,2),playerId=str_sub(playerId, 0,2)) %>% 
+  select(gameId, playerId, repNum, text) %>% kable()
 
 ```

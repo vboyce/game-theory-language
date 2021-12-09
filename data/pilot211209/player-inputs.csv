@@ -1,0 +1,11 @@
+﻿_id,playerId,gameId,createdAt,data.age,data.gender,data.language,data.raceWhite,data.raceBlack,data.raceAsian,data.raceNative,data.raceIslander,data.raceHispanic,data.education,data.correctness,data.human,data.workedWell,data.fair,data.chatUseful,data.feedback,data.time
+TpY3pNTd5n2n9KP73,STXF4MBw6pAhpFQzR,ayRiqvCEhCCSxAnS2,2021-12-09T18:02:55Z,18,Male,Hungarian,true,,,,,,lessHighSchool,yes,yes,neutral,Yes.,"Yes, of course!",No.,Yes!
+ogRGZLmSzheuTrLYX,3XoD7AQvHu3avJ9Fo,ayRiqvCEhCCSxAnS2,2021-12-09T18:04:19Z,35,Male,Italian,true,,,,,,bachelor,yes,no,neutral,I think it was ok,"Yes, it was pretty straightforward",I think I've been playing with a CPU all this time,Plenty
+DCvkaf6zchZuMS8YD,hgJpQRAv9sMrD6464,Nmb4cLjaDsHqt8ByN,2021-12-09T18:04:27Z,33,Male,English,true,,,,,,bachelor,yes,yes,stronglyAgree,Yes,Yes,No,Yes
+uyG96kamXms8g7Ct4,2kmtbTcHRHurrspLX,Nmb4cLjaDsHqt8ByN,2021-12-09T18:05:02Z,25,Female,English,true,,,,,,someCollege,yes,yes,agree,Yes it was definitely fair.,Yes very easy and simple.,"No, was great fun! thanks.","Yes, we had plenty of time to spare, we was both fast and attentive."
+rLtXureArqBTodeq3,zDMEyFj4dThs4gzrp,KMKga8KMs6QZFc9dR,2021-12-09T18:09:09Z,21,Male,Portuguesa,true,false,,,,,bachelor,yes,yes,stronglyAgree,Yes,Really easy,No,"Yes, of course."
+JMYWxm5tLzzofw2DW,CabZtomiyfsZdYF9Q,XWBXWaM8fHb2pPETr,2021-12-09T18:10:38Z,22,Male,Portuguese,true,,,,,,bachelor,yes,yes,stronglyAgree,Yes,Yes,No,"Yes, more than enough"
+YMLv6qNrjvefmdzAB,dhz4DnHhhaPYQNCay,XWBXWaM8fHb2pPETr,2021-12-09T18:10:57Z,26,female,portuguese,true,,,,,,master,yes,yes,stronglyAgree,yes,yes,no,yes
+ZFLNuJ8KGYYmBkDo6,9d7wNGCZf54Nyvkts,KMKga8KMs6QZFc9dR,2021-12-09T18:11:36Z,23,male,Portuguese,true,,,,,,bachelor,yes,yes,stronglyAgree,"Yes, the payment was more than fair.","Yes, it was very easy to use and made the study much more interesting.","No, the study was very good.","Yes, in none of the rounds did our time come close to the maximum time limit."
+BkpYKsPKEBuZpPzpb,Doke7X7WNnFwHZP4E,3NNzcmFe4Lqc76pWs,2021-12-09T18:14:18Z,25,Male,Greek,true,,,,,,someCollege,yes,yes,stronglyAgree,very fair,very easy,No,More than enough
+93pioKwHLLkpPhFmC,ekSbCaWp5aNMFarbX,3NNzcmFe4Lqc76pWs,2021-12-09T18:14:30Z,20,male,polish,true,,,,,,bachelor,yes,yes,stronglyAgree,yes,yes,no i think,yes 
