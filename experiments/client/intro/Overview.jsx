@@ -37,7 +37,7 @@ export default class Overview extends React.Component {
               if <b>you choose the yellow box and your partner also chooses the yellow box</b>, you each get <b>4 points</b>. If <b>you choose the green box and 
               your partner chooses the yellow box</b>, you get <b>6 points</b> and your partner gets 0 points. </p>
               
-            <p> <b>You can use the chat box on the left to communicate with your partner.</b></p>
+              <p> <b>{treatment.chatEnabled? "You can use the chat box on the left to communicate with your partner.":""} </b></p>
             
           <button
             type="button"

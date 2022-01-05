@@ -12,9 +12,8 @@ export default class Consent extends React.Component {
             <center><img width="300px" src="/experiment/stanford.png" /></center>
           </div>
           <p>
-          If you agree to take part in the research, you will play a series of communication games
-            with other participants: one of you will describe a picture so the others can choose it out of
-            a lineup of other pictures. This study will take approximately 15 minutes. </p>
+          If you agree to take part in the research, you will play a series of games
+            with other participants. This study will take approximately 15 minutes. </p>
             
             <p class="block-text" id="legal">By answering the following questions, you are participating in a study being performed by cognitive scientists in the 
           Stanford Department of Psychology. If you have questions about this research, please contact us at 

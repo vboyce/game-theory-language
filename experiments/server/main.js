@@ -54,6 +54,12 @@ function createBoSRewards(){
   return payoffs
 }
 
+function createRewards(game){
+  //wrapper
+  if (game=="PD") return createPDRewards()
+  if (game=="BoS") return createBoSRewards()
+}
+
 // gameInit is where the structure of a game is defined.  Just before
 // every game starts, once all the players needed are ready, this
 // function is called with the treatment and the list of players.  You
@@ -101,7 +107,7 @@ Empirica.gameInit((game, treatment) => {
       // Loop through targets in block   
         const round = game.addRound();
         round.set('targets', chooseTargets(targets));
-        round.set('payoffs', createBoSRewards());
+        round.set('payoffs', createRewards(treatment.gameType));
         round.set('repNum', repNum)        
         round.addStage({
           name: "selection",
