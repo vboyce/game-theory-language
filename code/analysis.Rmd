@@ -1,11 +1,18 @@
 ---
-title: "BoS pilot"
+title: "Study 1"
 output:
   html_document: 
     toc: true
 ---
+TODO notes:
 
-# TODO
+ - get empirica time recording to behave (grumble)
+ - read feedback
+ - remove incomplete game(s)
+ 
+# Study 1 notes
+
+2x2 study of BoS vs PD crossed with chat or no-chat. All did 40 trials. All did a 3 minute "turing-test" free chat at the start. Run Jan 7. Target was 20 pairs in each condition. 
 
 # Pre-process
 
@@ -33,10 +40,9 @@ ParseJSONColumn <- function(x) {
 }
 
 ##Data import constants
-data_location="data/pilot211209"
+data_location="data/study1_220107"
 
-
-date_start=lubridate::ymd('2021-12-09')
+date_start=lubridate::ymd('2022-01-07')
 
 #image_location="write-ups/images"
 
@@ -52,19 +58,36 @@ date_start=lubridate::ymd('2021-12-09')
 #   mutate(bonus=round(data.bonus,2),
 #          bonus=bonus %|% 0,
 #          cost=round(bonus*4/3,2)) %>%
-#   write_csv(here(data_location, "player_payments.csv")) %>% select(id,bonus) %>% write_csv(here(data_location,"for_prolific.csv"))
+#   write_csv(here(data_location, "player_payments.csv")) %>% select(id,bonus) %>%
+#   filter(bonus>0) %>% write_csv(here(data_location,"for_prolific.csv"))
 
 ```
 
 
-```{r, include=F, eval=F}
+```{r}
+
+d.treatments <- read_csv(here(data_location, 'treatments.csv')) %>% 
+  rename(treatmentId=`_id`) %>% 
+  select(treatmentId, name) %>% 
+  separate(name, c("game_cond", "chat_cond"))
 
 d.games <- read_csv(here(data_location, 'games.csv')) %>% 
   rename(gameId = `_id`) %>% 
-    filter(createdAt >= date_start)
+  left_join(d.treatments) %>% 
+    filter(createdAt >= date_start) %>% 
+  select(gameId,playerIds,game_cond,chat_cond)
+
+d.gameplayers <- d.games %>% separate(playerIds, c("p1","p2")) %>% 
+  pivot_longer(p1:p2, values_to="playerId") %>% 
+  select(-name)
 
 d.players <- read_csv(here(data_location, 'players.csv')) %>% 
-  select(playerId=`_id`,role=data.role)
+  select(playerId=`_id`,role=data.role, data.bonus) %>% 
+  left_join(d.gameplayers)
+
+```
+
+```{r, include=F, eval=F}
 
 d.chat.raw <- read_csv(here(data_location, 'rounds.csv'), guess_max=10000) %>%
   filter(createdAt >= date_start) %>%
@@ -72,8 +95,9 @@ d.chat.raw <- read_csv(here(data_location, 'rounds.csv'), guess_max=10000) %>%
   rename(row_id = `_id`) %>%
   mutate(data.chat = map(data.chat, .f = ParseJSONColumn)) %>%
   unnest(data.chat) %>% 
-  select( -ends_with('response'), -ends_with('time')) %>%
+  select( -ends_with('response'), -ends_with('time'), -ends_with('payoff'), -ends_with('role')) %>%
   rename_with(~ gsub("data.", "", .x, fixed = TRUE)) %>% 
+  left_join(d.games) %>% 
   write_csv(here(data_location, 'raw_chat.csv'))
 
 d.round_results.raw <- read_csv(here(data_location,'rounds.csv'),guess_max=10000) %>% 
@@ -102,6 +126,7 @@ d.round_results.raw <- read_csv(here(data_location,'rounds.csv'),guess_max=10000
          AB=ifelse(role=="p1", AB.p1, AB.p2),
          BA=ifelse(role=="p1", BA.p1, BA.p2),
          BB=ifelse(role=="p1", BB.p1, BB.p2)) %>% 
+  left_join(d.games) %>% 
   write_csv(here(data_location, 'raw_results.csv'))
 
 d.exit.survey <- read_csv(here(data_location, 'player-inputs.csv')) %>%
@@ -114,73 +139,99 @@ d.exit.survey <- read_csv(here(data_location, 'player-inputs.csv')) %>%
 
 ```
 
-# Metrics
-Paid $2.50 for 15 minutes with up to $4 bonus stated. 
+# Game length
+Estimated 15 mins total including intro/exit/waiting turing etc
 
-Sigh for those couple games.
+How long did people spend playing? (Not counting intro chat round)
 
-```{r}
+```{r total-time}
+# game KxJzRQeo5HikZxreo, player BkAWA2P83AnBmRcif has consistently unreasonable times (3300+, should be <180, so something's messing up)
+
+d.round_results %>% filter(gameId=="KxJzRQeo5HikZxreo") %>% select(repNum, time, playerId) %>% arrange(time)
 d.round_results <- read_csv(here(data_location,"raw_results.csv"))
 
-summary <- d.round_results %>% group_by(repNum, gameId) %>% 
-           mutate(time= time %|% 180) %>% 
+summary <- d.round_results %>% group_by(repNum, gameId, game_cond, chat_cond) %>% 
+  filter(time<181) %>% 
   summarize(max_time=max(time)) %>% 
-  group_by(gameId) %>% 
+  group_by(gameId, game_cond, chat_cond) %>% 
   summarize(total_time=sum(max_time)/60,
-            num_rounds=max(repNum))
+            num_rounds=max(repNum)) %>% 
+  filter(num_rounds==39)
 
-summary
-
-```
-```{r}
-
-#ggplot(d.round_results, aes(x=repNum, y=time, color=playerId))+geom_point()
-       
+ggplot(summary, aes(x=str_c(game_cond," ", chat_cond), y=total_time, color=str_c(game_cond," ", chat_cond)))+geom_jitter(width=.1)+  stat_summary(fun.data = "mean_cl_boot", position = position_dodge(width=.3), size=.5,color="black")+
+  labs(title="Game time in min", y="mins", x="condition")+theme(legend.position = "none")
 ```
 
-Some groups come close to maxxing bonuses
+# Bonuses
+
+Note that bonuses are not directly comparable between BoS & PD! 
+But it looks like chat helps in BoS and not in PD. 
 
 ```{r}
 pairs <- d.round_results %>% select(playerId,gameId) %>% unique()
-d.players <- read_csv(here(data_location, 'players.csv')) %>% select(playerId=`_id`,data.bonus) %>% filter(!is.na(data.bonus)) %>% left_join(pairs) %>% arrange(gameId)
+bonuses <- d.players %>%inner_join(pairs) %>%  select(playerId,data.bonus, chat_cond, game_cond) %>% filter(!is.na(data.bonus)) %>% left_join(pairs) %>% arrange(gameId)
 
-d.players
+ggplot(bonuses, aes(x=str_c(game_cond," ", chat_cond), y=data.bonus, color=str_c(game_cond," ", chat_cond)))+geom_jitter(width=.1)+
+  labs(title="Bonus earned", y="bonus", x="condition")+  stat_summary(fun.data = "mean_cl_boot", position = position_dodge(width=.3), size=.5,color="black")+theme(legend.position = "none")+scale_y_continuous(limits=c(0,6))
 ```
 
-Number of utterances 
-
-pre-chat -- really we want word count not utterances, but eh. 
-From skimming people do talk some. 
+# Pre-chat 
 ```{r}
 #this is a sloppy way to split, but eh, 
-chat <- read_csv(here(data_location, "raw_chat.csv")) %>% filter(!is.na(text)) %>% filter(is.na(targets))
+chat <- read_csv(here(data_location, "raw_chat.csv")) %>% filter(!is.na(text)) %>% filter(is.na(targets)) %>% 
+  mutate(words=str_count(text, "\\w+")) %>%  group_by(gameId, playerId, chat_cond, game_cond) %>% summarize(words=sum(words))
 
-chat %>% group_by(gameId, playerId) %>% tally()
+ggplot(chat, aes(x=str_c(game_cond," ", chat_cond), y=words))+geom_jitter(width=.1)+
+  labs(title="Words produced in pre-chat", y="words", x="condition")
 ```
+
+# During chat
+
+This chat is raw. There are outliers that have been chopped off. 
+People talk more during BoS than PD. 
 
 ```{r}
-chat <- read_csv(here(data_location, "raw_chat.csv")) %>% filter(!is.na(text)) %>% filter(!is.na(targets))
+game_chat <- read_csv(here(data_location, "raw_chat.csv")) %>% filter(!is.na(targets)) %>% filter(chat_cond=="chat") %>% 
+  mutate(words=str_count(text, "\\w+") %|% int(0)) %>%  group_by(gameId, playerId, game_cond, repNum) %>% summarize(words=sum(words))
 
-chat %>% group_by(gameId, playerId) %>% tally() %>% full_join(d.players)
+chat_by_game <- game_chat %>% group_by(gameId, game_cond, repNum) %>% summarize(words=sum(words))
 
+is_chat <- chat_by_game %>% mutate(is.chat=ifelse(words>0, 1,0)) %>% group_by(game_cond, repNum) %>% summarize(pct_chat=mean(is.chat))
+
+ggplot(game_chat, aes(x=repNum, y=words, color=game_cond))+geom_jitter(width=.1, size=1, alpha=.2)+facet_wrap(~game_cond)+scale_y_continuous(limits=c(0,30))+
+  geom_smooth()+
+  labs(title="Words produced per round per player", y="words")
+
+ggplot(chat_by_game, aes(x=repNum, y=words, color=game_cond))+geom_jitter(width=.1, size=1, alpha=.2)+facet_wrap(~game_cond)+scale_y_continuous(limits=c(0,30))+
+  geom_smooth()+
+  labs(title="Words produced per round per game", y="words")
+
+ggplot(is_chat, aes(x=repNum, y=pct_chat, color=game_cond))+geom_point()+
+  labs(title="Pct games who said anything", y="pct")
 ```
+Currently open questions -- is that game-related chat, or is it just that it's a friendlier game? 
+Does the chatting help? 
 
-When they talk
+To look at if chatting helps -- we can compare forced no-chat to chat (see bonuses above). We can also compare used chat (0/1 or amount) within those that could chat. 
+
+Options for dependent variable are bonus (although there's some noise there) or option chosen. 
 
 ```{r}
-chat %>% group_by(gameId, playerId, repNum) %>% tally() %>% filter(n>0) %>% 
-  ggplot(aes(x=repNum, y=playerId, color=gameId))+geom_point()
+
+group_chat <- chat_by_game %>% mutate(is.chat=ifelse(words>0, 1,0)) %>% group_by(game_cond, gameId) %>% summarize(pct_chat=mean(is.chat))
+
+all <- d.players %>% left_join(group_chat) %>% filter(data.bonus>0)
+
+ggplot(all, aes(x=pct_chat, y=data.bonus, color=game_cond))+geom_point()
 
 ```
-(Full chat transcript at bottom)
-
-
+Looks like chatting helps for BoS, doesn't get used much for PD. 
 
 # What do people choose
-   "AA":Best for P1
-   "BB":Best for P2
 
-Looks like there's convergence by 20 for the groups that converge, but it may not be obvious they have -- 40 rounds looks right. 
+In BoS: P1 prefers AA to BB, P2 prefers BB to AA. AB and BA are bad for both. 
+
+In PD: 
 
 ```{r}
 outcome <- d.round_results %>% select(gameId:repNum, response,role) %>% 
@@ -191,7 +242,6 @@ ggplot(outcome, aes(x=repNum, y=outcome, color=gameId))+geom_jitter(height=.1)+f
 
 ```
 
-Player 2 prefers option B, player 1 prefers action A. 
 
 ```{r}
 outcome <- d.round_results %>% select(gameId:repNum, response,role)
@@ -200,24 +250,3 @@ ggplot(outcome, aes(x=role, fill=response))+geom_bar(position="dodge")+facet_wra
 
 ```
 
-# What do they say about the game
-
-
-
-```{r}
-  comments <- read_csv(here(data_location,'exit.csv')) %>% select(playerId, gameId, human, workedWell, fair, chatUseful) %>% mutate(gameId=str_sub(gameId, 0,2),playerId=str_sub(playerId, 0,2)) %>% filter(!is.na(gameId)) %>% arrange(gameId)
-
-comments %>% select(playerId, human, workedWell)
-
-comments %>% select(playerId,fair)
-
-comments %>% select(playerId, chatUseful)
-
-```
-# Chat
-
-```{r}
-read_csv(here(data_location, "raw_chat.csv")) %>% filter(!is.na(text)) %>% mutate(gameId=str_sub(gameId, 0,2),playerId=str_sub(playerId, 0,2)) %>% 
-  select(gameId, playerId, repNum, text) %>% kable()
-
-```
