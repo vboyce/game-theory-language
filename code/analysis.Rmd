@@ -147,7 +147,6 @@ How long did people spend playing? (Not counting intro chat round)
 ```{r total-time}
 # game KxJzRQeo5HikZxreo, player BkAWA2P83AnBmRcif has consistently unreasonable times (3300+, should be <180, so something's messing up)
 
-d.round_results %>% filter(gameId=="KxJzRQeo5HikZxreo") %>% select(repNum, time, playerId) %>% arrange(time)
 d.round_results <- read_csv(here(data_location,"raw_results.csv"))
 
 summary <- d.round_results %>% group_by(repNum, gameId, game_cond, chat_cond) %>% 
@@ -160,12 +159,15 @@ summary <- d.round_results %>% group_by(repNum, gameId, game_cond, chat_cond) %>
 
 ggplot(summary, aes(x=str_c(game_cond," ", chat_cond), y=total_time, color=str_c(game_cond," ", chat_cond)))+geom_jitter(width=.1)+  stat_summary(fun.data = "mean_cl_boot", position = position_dodge(width=.3), size=.5,color="black")+
   labs(title="Game time in min", y="mins", x="condition")+theme(legend.position = "none")
+
+summary %>% group_by(game_cond, chat_cond) %>% tally()
 ```
+A respectable rate of game completion. 
 
 # Bonuses
 
 Note that bonuses are not directly comparable between BoS & PD! 
-But it looks like chat helps in BoS and not in PD. 
+But it looks like chat helps in BoS and not (much?) in PD. 
 
 ```{r}
 pairs <- d.round_results %>% select(playerId,gameId) %>% unique()
@@ -184,6 +186,7 @@ chat <- read_csv(here(data_location, "raw_chat.csv")) %>% filter(!is.na(text)) %
 ggplot(chat, aes(x=str_c(game_cond," ", chat_cond), y=words))+geom_jitter(width=.1)+
   labs(title="Words produced in pre-chat", y="words", x="condition")
 ```
+People talked some. I haven't looked at the transcripts at all. 
 
 # During chat
 
@@ -212,6 +215,8 @@ ggplot(is_chat, aes(x=repNum, y=pct_chat, color=game_cond))+geom_point()+
 Currently open questions -- is that game-related chat, or is it just that it's a friendlier game? 
 Does the chatting help? 
 
+# Does chat help? 
+
 To look at if chatting helps -- we can compare forced no-chat to chat (see bonuses above). We can also compare used chat (0/1 or amount) within those that could chat. 
 
 Options for dependent variable are bonus (although there's some noise there) or option chosen. 
@@ -227,26 +232,39 @@ ggplot(all, aes(x=pct_chat, y=data.bonus, color=game_cond))+geom_point()
 ```
 Looks like chatting helps for BoS, doesn't get used much for PD. 
 
-# What do people choose
+## Choices 
 
 In BoS: P1 prefers AA to BB, P2 prefers BB to AA. AB and BA are bad for both. 
 
-In PD: 
+In PD: P1 prefers BA > AA > BB > AB and P2 prefers AB > AA > BB > BA. (BB is Nash equilibrium, AA is Pareto dominant.)
 
+Not really sure how to visualize this efficiently? 
+
+Being in the chat condition v not
+ 
 ```{r}
-outcome <- d.round_results %>% select(gameId:repNum, response,role) %>% 
+outcome <- d.round_results %>% select(gameId:repNum, response,role, game_cond, chat_cond) %>% 
   pivot_wider(names_from=role, values_from=response) %>% 
   mutate(outcome=str_c(p1,p2))
 
-ggplot(outcome, aes(x=repNum, y=outcome, color=gameId))+geom_jitter(height=.1)+facet_wrap(.~gameId)
+ggplot(outcome, aes(x=repNum, y=outcome))+geom_jitter(width=.1, alpha=.25)+facet_grid(game_cond~chat_cond)+theme(legend.position="none")
+
+outcome_summary <- outcome %>% group_by(game_cond, chat_cond, repNum,outcome) %>% tally() %>% group_by(game_cond, chat_cond, repNum) %>% summarize(pct=n/sum(n), outcome=outcome)
+
+ggplot(outcome_summary, aes(x=repNum, y=pct, color=chat_cond))+geom_line()+facet_grid(game_cond~outcome)
 
 ```
 
+Actually using the chat that round
 
 ```{r}
-outcome <- d.round_results %>% select(gameId:repNum, response,role)
+outcome <- d.round_results %>% select(gameId:repNum, response,role, game_cond, chat_cond) %>% 
+  pivot_wider(names_from=role, values_from=response) %>% 
+  mutate(outcome=str_c(p1,p2)) %>% filter(chat_cond=="chat") %>% left_join(chat_by_game) %>% mutate(is.chat=ifelse(words>0, 1,0))
 
-ggplot(outcome, aes(x=role, fill=response))+geom_bar(position="dodge")+facet_wrap(.~gameId)
+outcome_summary <- outcome %>% group_by(game_cond, is.chat, repNum,outcome) %>% tally() %>% group_by(game_cond, is.chat, repNum) %>% summarize(pct=n/sum(n), outcome=outcome)
+
+ggplot(outcome_summary, aes(x=repNum, y=pct, color=as.factor(is.chat)))+geom_line()+facet_grid(game_cond~outcome)
 
 ```
 
