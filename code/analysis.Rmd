@@ -349,3 +349,55 @@ bot
 
 Only 10-20% of players think the other person is a bot! 
 
+# Poking at time recording
+
+Conclusion -- doing things player side is just a bad idea! and the times are worse than thought. 
+```{r total-time}
+# game KxJzRQeo5HikZxreo, player BkAWA2P83AnBmRcif has consistently unreasonable times (3300+, should be <180, so something's messing up)
+
+d.round_results <- read_csv(here(data_location,"raw_results.csv"))
+
+summary <- d.round_results %>% group_by(repNum, gameId, game_cond, chat_cond) %>% 
+  filter(time<181) %>% 
+  summarize(max_time=max(time)) %>% 
+  group_by(gameId, game_cond, chat_cond) %>% 
+  summarize(total_time=sum(max_time)/60,
+            num_rounds=max(repNum))
+
+ggplot(summary, aes(x=str_c(game_cond," ", chat_cond), y=total_time, color=str_c(game_cond," ", chat_cond)))+geom_jitter(width=.1)+  stat_summary(fun.data = "mean_cl_boot", position = position_dodge(width=.3), size=.5,color="black")+
+  labs(title="Game time in min", y="mins", x="condition")+theme(legend.position = "none")
+
+summary %>% group_by(game_cond, chat_cond) %>% tally()
+```
+
+Empirica recommends using stages.csv startTimeAt and players-stages.csv submittedAt
+
+```{r}
+d.stages <- read_csv(here(data_location,"stages.csv")) %>% rename(stageId=`_id`)
+
+d.player_stages <- read_csv(here(data_location,"player-stages.csv")) %>%
+  left_join(d.stages) %>% 
+  filter(!is.na(submittedAt)) %>% 
+  mutate(timedif=submittedAt-startTimeAt)
+
+d.player_stages %>% filter(playerId=="BkAWA2P83AnBmRcif") %>% View()
+
+blah <- read_csv(here(data_location,'rounds.csv'),guess_max=10000) %>% 
+  filter(createdAt >= date_start) %>% 
+  rename_with(~ gsub("data.", "", .x, fixed = TRUE)) %>% 
+  rename_with ( ~ gsub("room", "player", .x, fixed=T)) %>% 
+    rename_with ( ~ gsub("player", "player_", .x, fixed=T)) %>% 
+    rename_with ( ~ gsub("response", "_response", .x, fixed=T)) %>% 
+  rename_with( ~ gsub("time", "_time", .x, fixed=T)) %>% 
+  select(-chat) %>% 
+  gather(key, value, starts_with('player')) %>% 
+  separate(key, into = c('blah', 'playerId', 'info')) %>% 
+  spread(info, value) %>% 
+  rename(roundId=`_id`) %>% 
+  select(roundId, playerId, time)
+foobar <- d.player_stages %>% select(playerId, roundId, timedif) %>% left_join(blah) %>% mutate(time=as.numeric(time)/1000) %>% mutate(check=timedif-time) 
+
+
+View(foobar)
+
+```

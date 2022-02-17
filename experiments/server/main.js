@@ -58,6 +58,10 @@ function createRewards(game){
   //wrapper
   if (game=="PD") return createPDRewards()
   if (game=="BoS") return createBoSRewards()
+  if (game=="mixPDBoS") {
+    if(Math.random()>.5) return createPDRewards()
+    else return createBoSRewards()
+  }
 }
 
 // gameInit is where the structure of a game is defined.  Just before

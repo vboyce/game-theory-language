@@ -39,9 +39,10 @@ Empirica.onRoundStart((game, round) => {
     player.set("targets", _.shuffle(round.get("targets")));
 
     player.set('clicked', false);
-    player.set('timeClick', false);
     player.set("scoreIncrement",0)
   });
+  console.log(round)
+  console.log(players)
 });
 
 // onRoundStart is triggered before each stage starts.
@@ -80,7 +81,7 @@ Empirica.onStageEnd((game, round, stage) => {
       const scoreIncrement=player.get("scoreIncrement")
       player.set("bonus", scoreIncrement*.01*scale + currScore);
       round.set('player_' + player._id + '_response', player.get('clicked'));
-      round.set('player_' + player._id + '_time', player.get('timeClick'));
+      round.set('player_' + player._id + '_time', player.stage.submittedAt-stage.startTimeAt);
       round.set('player_' + player._id + '_payoff', player.get('scoreIncrement'));
       round.set('player_' + player._id + '_role', player.get('role'));
     });

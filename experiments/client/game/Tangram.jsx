@@ -10,7 +10,6 @@ export default class Tangram extends React.Component {
     if (stage.name == 'selection' &
         player.get('clicked') === false) {
       player.set("clicked", tangram)
-      player.set("timeClick", Date.now()-stage.startTimeAt)
       if (!round.get('submitted')){
         round.set('submitted', true)
       }
