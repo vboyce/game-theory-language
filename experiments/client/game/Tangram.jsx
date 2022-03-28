@@ -23,7 +23,6 @@ export default class Tangram extends React.Component {
         type: "selectionAlert",
         time: Date.now()
       });
-
     }
   };
 
