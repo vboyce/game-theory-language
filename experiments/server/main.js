@@ -54,13 +54,19 @@ function createBoSRewards(){
   return payoffs
 }
 
-function createRewards(game){
+function createRewards(type){
   //wrapper
-  if (game=="PD") return createPDRewards()
-  if (game=="BoS") return createBoSRewards()
+  if (type=="PD") return createPDRewards()
+  if (type=="BoS") return createBoSRewards()
+}
+
+function getType(game){
+  //wrapper
+  if (game=="PD") return "PD"
+  if (game=="BoS") return "BoS"
   if (game=="mixPDBoS") {
-    if(Math.random()>.5) return createPDRewards()
-    else return createBoSRewards()
+    if(Math.random()>.5) return "PD"
+    else return "BoS"
   }
 }
 
@@ -110,8 +116,9 @@ Empirica.gameInit((game, treatment) => {
         //mixed_targets=_.shuffle(targets)
       // Loop through targets in block   
         const round = game.addRound();
+        round.set('type', getType(treatment.gameType))
         round.set('targets', chooseTargets(targets));
-        round.set('payoffs', createRewards(treatment.gameType));
+        round.set('payoffs', createRewards(round.get('type')));
         round.set('repNum', repNum)        
         round.addStage({
           name: "selection",
