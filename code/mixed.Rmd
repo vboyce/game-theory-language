@@ -1,0 +1,291 @@
+---
+title: "Mix of PD and BoS"
+output:
+  html_document: 
+    toc: true
+---
+
+Future notes:
+
+- would be better to have game type coded as "gametype" to avoid namespace collision
+- TODO: trends over game time!
+- TODO: transcript reading
+- TODO: game time & feedback
+
+# Pre-process
+
+```{r set-up, include=F}
+knitr::opts_chunk$set(echo = FALSE, warning=F, message=F)
+knitr::opts_chunk$set(dev = "png", dev.args = list(type = "cairo-png"))
+options(knitr.table.format = "html")
+library(tidyverse)
+library(jsonlite)
+library(here)
+library(rlang)
+library(lme4)
+library(brms)
+library(rstan)
+library(viridis)
+library(knitr)
+
+rstan_options(auto_write = TRUE)
+options(mc.cores = parallel::detectCores())
+theme_set(theme_bw())
+
+ParseJSONColumn <- function(x) {
+  str_c("[ ", str_c(x, collapse = ",", sep=" "), " ]")  %>% 
+    fromJSON(flatten = T)
+}
+
+##Data import constants
+data_location="data/study2_220413"
+
+date_start=lubridate::ymd('2022-04-13')
+
+study1_loc="data/study1_220107"
+#image_location="write-ups/images"
+
+#model_location="code/models"
+```
+
+```{r bonus}
+##This is for determining participant bonuses using the version of data with PID
+
+# d.players <- read_csv(here(data_location, 'players.csv')) %>%
+#   rename(playerId=`_id`) %>%
+#   select(data.bonus, playerId,id) %>%
+#   mutate(bonus=round(data.bonus,2),
+#          bonus=bonus %|% 0,
+#          cost=round(bonus*4/3,2)) %>%
+#   write_csv(here(data_location, "player_payments.csv")) %>% select(id,bonus) %>%
+#   filter(bonus>0) %>% write_csv(here(data_location,"for_prolific.csv"))
+
+```
+
+
+```{r, include=F, eval=F}
+
+d.treatments <- read_csv(here(data_location, 'treatments.csv')) %>% 
+  rename(treatmentId=`_id`) %>% 
+  select(treatmentId, name) %>% 
+  mutate(name=ifelse(name=="mix-chat", "mix-nochat", name)) %>% #VB 220413: turns out naming conventions matter...
+  separate(name, c("game_cond", "chat_cond"))
+
+d.games <- read_csv(here(data_location, 'games.csv')) %>% 
+  rename(gameId = `_id`) %>% 
+  left_join(d.treatments) %>% 
+    filter(createdAt >= date_start) %>% 
+  select(gameId,playerIds,game_cond,chat_cond)
+
+d.gameplayers <- d.games %>% separate(playerIds, c("p1","p2")) %>% 
+  pivot_longer(p1:p2, values_to="playerId") %>% 
+  select(-name)
+
+d.players <- read_csv(here(data_location, 'players.csv')) %>% 
+  select(playerId=`_id`,role=data.role, data.bonus) %>% 
+  left_join(d.gameplayers)
+
+```
+
+```{r, include=F, eval=F}
+
+d.chat.raw <- read_csv(here(data_location, 'rounds.csv'), guess_max=10000) %>% 
+  filter(createdAt >= date_start) %>%
+  mutate(data.chat = ifelse(is.na(data.chat), '{}', data.chat)) %>%
+  rename(row_id = `_id`) %>% 
+  mutate(data.chat = map(data.chat, .f = ParseJSONColumn)) %>%
+  unnest(data.chat) %>% 
+  select( -ends_with('response'), -ends_with('time'), -ends_with('payoff'), -ends_with('role')) %>% 
+  rename(data.gametype=data.type) %>% #VB 220413:this fixes a collision with the "type" column
+  rename_with(~ gsub("data.", "", .x, fixed = TRUE)) %>% 
+  left_join(d.games) %>% 
+  write_csv(here(data_location, 'raw_chat.csv'))
+
+d.round_results.raw <- read_csv(here(data_location,'rounds.csv'),guess_max=10000) %>% 
+  filter(createdAt >= date_start) %>% 
+    rename(data.gametype=data.type) %>% #VB 220413:this fixes a collision with the "type" column
+  rename_with(~ gsub("data.", "", .x, fixed = TRUE)) %>% 
+  rename_with ( ~ gsub("room", "player", .x, fixed=T)) %>% 
+    rename_with ( ~ gsub("player", "player_", .x, fixed=T)) %>% 
+    rename_with ( ~ gsub("response", "_response", .x, fixed=T)) %>% 
+  rename_with( ~ gsub("time", "_time", .x, fixed=T)) %>% 
+  select(-chat) %>% 
+  gather(key, value, starts_with('player')) %>% 
+  separate(key, into = c('blah', 'playerId', 'info')) %>% 
+  spread(info, value) %>% 
+  select(-blah) %>% 
+  select(-stageIds,-index,-createdAt,-submitted) %>% 
+  filter(!is.na(response)) %>% 
+  mutate(time=as.numeric(time)/1000) %>% 
+  mutate(targets=map(targets, .f=ParseJSONColumn)) %>% 
+  unnest(targets) %>% 
+  mutate(image = gsub('/experiment/', '', image, fixed=TRUE),
+        image = gsub('.jpeg', '', image, fixed=TRUE)) %>% 
+  pivot_wider(names_from=label, names_prefix="box_", values_from=image) %>% 
+    mutate(payoffs=map(payoffs, .f=ParseJSONColumn)) %>%
+  unnest(payoffs) %>% 
+  mutate(AA=ifelse(role=="p1", AA.p1, AA.p2),
+         AB=ifelse(role=="p1", AB.p1, AB.p2),
+         BA=ifelse(role=="p1", BA.p1, BA.p2),
+         BB=ifelse(role=="p1", BB.p1, BB.p2),
+         type=ifelse(AB==0 & BA==0, "BoS", "PD")) %>% 
+  left_join(d.games) 
+
+d.exit.survey <- read_csv(here(data_location, 'player-inputs.csv')) %>%
+  filter(createdAt >= date_start) %>%
+  left_join(d.games, by = c('gameId')) %>%
+    rename_with(~ gsub("data.", "", .x, fixed = TRUE)) 
+
+d.complete <- d.round_results.raw %>% group_by(gameId, playerId) %>% 
+  summarize(max_rep=max(repNum)) %>% filter(max_rep==39) %>% select(gameId,playerId) %>% 
+  write_csv(here(data_location,"complete.csv"))
+
+d.chat <- d.chat.raw %>% inner_join(d.complete) %>% 
+  write_csv(here(data_location, 'raw_chat.csv'))
+d.round_results <- d.round_results.raw %>% inner_join(d.complete) %>% 
+  write_csv(here(data_location, 'raw_results.csv'))
+d.exit <- d.exit.survey %>% inner_join(d.complete) %>% 
+  write_csv(here(data_location,'exit.csv'))
+
+```
+
+# Read data
+
+```{r comparison data}
+study1.chat <- read_csv(here(study1_loc,"raw_chat.csv")) %>% 
+    mutate(gametype=game_cond,
+         mix="pure") %>% 
+  select(gameId,text, type, repNum, playerId, chat_cond, gametype,mix, game_cond, targets)
+study1.rounds <- read_csv(here(study1_loc,"raw_results.csv")) %>% 
+  mutate(gametype=game_cond,
+         mix="pure") %>% 
+  select(gameId,repNum, playerId,payoff, response, time, box_A, box_B, AA, AB, BA, BB, chat_cond, gametype,mix, role)
+
+study2.chat <- read_csv(here(data_location,"raw_chat.csv")) %>% 
+  mutate(mix="mix") %>% 
+  select(gameId,text, type, repNum, playerId, chat_cond, gametype,mix, game_cond, targets)
+study2.rounds <- read_csv(here(data_location,"raw_results.csv")) %>% 
+  mutate(mix="mix") %>% 
+  select(gameId,repNum, playerId,payoff, response, time, box_A, box_B, AA, AB, BA, BB, chat_cond, gametype,mix, role)
+
+rounds <- study1.rounds %>% union(study2.rounds)
+chat <- study1.chat %>% union(study2.chat)
+```
+# Summary of expts
+All expts reported here are from pairs of participants who played 40 rounds of a game-theory type game. At the start, each pair had 3 minutes of free chat, and then played the game. In exp 1, pairs were assigned to either all-PD or all-BoS games crossed with either access to the chat during the game or not. 
+
+In exp 2, all pairs played a random mix of PD and BoS rounds with or without access to the chat. 
+
+The exact payoffs of each round were determined randomly. 
+
+Throughout, I split up the results of the mixed games by which type to compare to the pure games. Thus, while 6 game conditions were run, 8 conditions are discussed.
+
+```{r}
+
+chat %>% select(gameId, game_cond, chat_cond) %>% unique() %>% group_by(game_cond, chat_cond) %>% tally()
+
+```
+
+# Overall outcomes
+
+To compare overall performance across these conditions, we can look at the average payoff for each player. Here we split the results of the mixed games by which game (PD or BoS). 
+
+```{r}
+bonuses <- rounds %>%group_by(playerId,gameId, chat_cond,gametype,mix) %>% summarize(payoff=mean(payoff))
+
+
+
+ggplot(bonuses, aes(x=str_c(mix," ",chat_cond), y=payoff, color=chat_cond))+geom_jitter(width=.1)+
+  facet_grid(.~gametype)+
+  labs(y="mean_reward", x="condition")+  stat_summary(fun.data = "mean_cl_boot", position = position_dodge(width=.3), size=.5,color="black")+theme(legend.position = "none")+scale_y_continuous(limits=c(0,6))
+```
+
+PD performance appears constant across games and chat conditions. BoS performance benefits from having a chat in pure and mixed games. 
+
+# Pre-chat
+
+We hope that players use the pre-chat to communicate with each other and convince themselves that the other person is a human. All games are the same at this point, so we don't expect differential amounts of talk. 
+
+```{r}
+prechat <- chat %>% filter(!is.na(text)) %>% 
+  filter(is.na(targets)) %>% mutate(words=str_count(text, "\\w+") %|% int(0)) %>%  group_by(gameId, playerId, game_cond, chat_cond) %>% summarize(words=sum(words))
+
+ggplot(prechat, aes(x=str_c(game_cond," ",chat_cond), y=words))+geom_jitter(width=.1, color="lightblue")+ stat_summary(fun.data = "mean_cl_boot", position = position_dodge(width=.3), size=.5,color="black")+theme(legend.position = "none")+labs(y="pre-chat words / player", x="game type")
+```
+
+# During chat
+
+This is raw chat, so it's unclear if these are referential expressions or chit chat or what. 
+
+People in pure PD games are less likely to talk than those on BoS or mixed games. Amount of talking seems to decline over rounds. 
+
+Because many of the talkings are short, we also binarize and look at whether any chat was produced in a given round. 
+
+Mixed games seem to fall in between the talking amounts of the pure games. 
+
+```{r}
+game_chat <- chat %>% filter(chat_cond=="chat") %>% filter(!is.na(targets)) %>% select(-type) %>% left_join(rounds) %>% 
+  mutate(words=str_count(text, "\\w+") %|% int(0)) %>%  group_by(gameId, playerId, gametype,  mix, repNum) %>% summarize(words=sum(words))
+
+chat_by_pair <- game_chat %>% group_by(gameId, gametype, mix, repNum) %>% summarize(words=sum(words))
+
+is_chat <- chat_by_pair %>% mutate(is.chat=ifelse(words>0, 1,0)) %>% group_by(gametype, mix, repNum) %>% summarize(pct_chat=mean(is.chat))
+
+# ggplot(game_chat, aes(x=repNum, y=words, color=mix))+geom_jitter(width=.1, size=1, alpha=.2)+facet_wrap(~gametype)+scale_y_continuous(limits=c(0,30))+
+#   geom_smooth()+
+#   labs(title="Words produced per round per player", y="words")
+
+ggplot(chat_by_pair, aes(x=repNum, y=words, color=gametype))+geom_jitter(width=.1, size=1, alpha=.2)+facet_grid(mix~gametype)+scale_y_continuous(limits=c(0,30))+
+  geom_smooth()+
+  labs(title="Words produced per round per game", y="words")
+
+ggplot(is_chat, aes(x=repNum, y=pct_chat, color=gametype))+geom_point()+
+  facet_grid(gametype~mix)+
+  labs(y="pct of games who said anything each round")
+```
+
+# Does chat help? 
+
+We look at how many rounds had non-zero chat (of those with the option to chat) compared to mean payoff. There's some serious sparsity, but it looks like talking helps for BoS. 
+
+```{r}
+success <- rounds %>% filter(chat_cond=="chat") %>% select(playerId, gameId, gametype, mix, payoff) %>% inner_join(chat_by_pair) %>% mutate(is.chat=ifelse(words>0, 1,0)) %>% group_by(gameId, gametype, mix) %>% summarize(mean_payout=mean(payoff), mean_chat=mean(is.chat))
+
+ggplot(success, aes(x=mean_chat, y=mean_payout, color=gametype))+geom_point()+facet_wrap(~mix)
+
+```
+
+## Choices 
+
+Rather than collapsing over outcome (which has some randomness), we can look at per-round, which quadrant in the game people chose. 
+
+In BoS: P1 prefers AA to BB, P2 prefers BB to AA. AB and BA are bad for both. 
+
+In PD: P1 prefers BA > AA > BB > AB and P2 prefers AB > AA > BB > BA. (BB is Nash equilibrium, AA is Pareto dominant.)
+
+This is a lot of cells, so we break up the graphs into whether chat was unavailable, used, or not-used. Blue lines are at 25% indicating chance from random or uncoordinated clicking.
+
+```{r}
+outcome <- rounds %>% select(-playerId, -time,-payoff, -box_A, -box_B, -AA, -AB, -BA, -BB) %>%  
+  pivot_wider(names_from=role, values_from=response) %>% 
+  mutate(outcome=str_c(p1,p2))  %>% left_join(chat_by_pair) %>% mutate(is.chat=ifelse(words>0, 1,0))
+
+outcome_summary <- outcome %>% group_by(gametype, chat_cond, mix, is.chat, repNum,outcome) %>% tally() %>% group_by(gametype, chat_cond, mix, is.chat, repNum) %>% summarize(pct=n/sum(n), outcome=outcome)
+
+#ggplot(outcome_summary, aes(x=repNum, y=pct, color=as.factor(is.chat)), )+geom_point(size=1)+facet_grid(str_c(gametype,mix)~outcome)
+
+ggplot(outcome_summary %>% filter(is.na(is.chat)), aes(x=repNum, y=pct))+
+    geom_hline(yintercept=.25, color="blue", size=1)+
+  geom_point(size=1)+
+  facet_grid(str_c(gametype,mix)~outcome)+labs(title="Rounds without the option for chat")
+
+ggplot(outcome_summary %>% filter((is.chat)==1), aes(x=repNum, y=pct))+
+    geom_hline(yintercept=.25, color="blue", size=1)+
+  geom_point(size=1)+
+  facet_grid(str_c(gametype,mix)~outcome)+labs(title="Rounds that did use chat")
+
+ggplot(outcome_summary %>% filter((is.chat)==0), aes(x=repNum, y=pct))+
+    geom_hline(yintercept=.25, color="blue", size=1)+
+  geom_point(size=1)+
+  facet_grid(str_c(gametype,mix)~outcome)+labs(title="Rounds that could use chat but didn't")
+```
