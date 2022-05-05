@@ -9,7 +9,6 @@ Future notes:
 
 - would be better to have game type coded as "gametype" to avoid namespace collision
 - TODO: trends over game time!
-- TODO: transcript reading
 - TODO: game time & feedback
 
 # Pre-process
@@ -43,7 +42,7 @@ data_location="data/study2_220413"
 date_start=lubridate::ymd('2022-04-13')
 
 study1_loc="data/study1_220107"
-#image_location="write-ups/images"
+image_location="write-ups/images"
 
 #model_location="code/models"
 ```
@@ -170,6 +169,17 @@ study2.rounds <- read_csv(here(data_location,"raw_results.csv")) %>%
 
 rounds <- study1.rounds %>% union(study2.rounds)
 chat <- study1.chat %>% union(study2.chat)
+
+study1.exit <- read_csv(here(study1_loc,"exit.csv")) 
+
+study2.exit <- read_csv(here(data_location, "exit.csv"))
+
+s1 <- read_csv(here(study1_loc,"raw_results.csv")) %>% 
+  select(chat_cond, game_cond, playerId) 
+players <- read_csv(here(data_location,"raw_results.csv")) %>% 
+  select(chat_cond, game_cond, playerId) %>% union(s1) %>% 
+  unique()
+exit <- study1.exit %>% union(study2.exit) %>% inner_join(players)
 ```
 # Summary of expts
 All expts reported here are from pairs of participants who played 40 rounds of a game-theory type game. At the start, each pair had 3 minutes of free chat, and then played the game. In exp 1, pairs were assigned to either all-PD or all-BoS games crossed with either access to the chat during the game or not. 
@@ -195,9 +205,16 @@ bonuses <- rounds %>%group_by(playerId,gameId, chat_cond,gametype,mix) %>% summa
 
 
 
-ggplot(bonuses, aes(x=str_c(mix," ",chat_cond), y=payoff, color=chat_cond))+geom_jitter(width=.1)+
+ggplot(bonuses, aes(x=str_c(mix,"\n",chat_cond), y=payoff, color=str_c(mix," ",chat_cond)))+geom_jitter(width=.1, alpha=.5)+
   facet_grid(.~gametype)+
-  labs(y="mean_reward", x="condition")+  stat_summary(fun.data = "mean_cl_boot", position = position_dodge(width=.3), size=.5,color="black")+theme(legend.position = "none")+scale_y_continuous(limits=c(0,6))
+  scale_color_viridis(discrete=T)+
+  labs(y="mean_reward", x="condition")+  stat_summary(fun.data = "mean_cl_boot", position = position_dodge(width=.3), size=.7,color="black")+theme(legend.position = "none")+coord_cartesian(ylim=c(0,6))+labs(y="Mean reward / trial")+
+    theme(axis.text=element_text(size=12), 
+        axis.title=element_text(size=14),
+        strip.text=element_text(size=14) )
+
+
+ggsave(here(image_location, 'payoff.png'), width=6, height=3.5, device="png", type="cairo-png")
 ```
 
 PD performance appears constant across games and chat conditions. BoS performance benefits from having a chat in pure and mixed games. 
@@ -210,7 +227,13 @@ We hope that players use the pre-chat to communicate with each other and convinc
 prechat <- chat %>% filter(!is.na(text)) %>% 
   filter(is.na(targets)) %>% mutate(words=str_count(text, "\\w+") %|% int(0)) %>%  group_by(gameId, playerId, game_cond, chat_cond) %>% summarize(words=sum(words))
 
-ggplot(prechat, aes(x=str_c(game_cond," ",chat_cond), y=words))+geom_jitter(width=.1, color="lightblue")+ stat_summary(fun.data = "mean_cl_boot", position = position_dodge(width=.3), size=.5,color="black")+theme(legend.position = "none")+labs(y="pre-chat words / player", x="game type")
+ggplot(prechat, aes(x=str_c(game_cond,"\n",chat_cond), y=words))+geom_jitter(width=.1, color="lightblue")+ stat_summary(fun.data = "mean_cl_boot", position = position_dodge(width=.3), size=.5,color="black")+theme(legend.position = "none")+labs(y="Pre-chat words / player", x="")+
+      theme(axis.text=element_text(size=12), 
+        axis.title=element_text(size=14),
+        strip.text=element_text(size=14) )
+
+
+ggsave(here(image_location, 'prechat.png'), width=6, height=3.5, device="png", type="cairo-png")
 ```
 
 # During chat
@@ -235,13 +258,28 @@ is_chat <- chat_by_pair %>% mutate(is.chat=ifelse(words>0, 1,0)) %>% group_by(ga
 #   geom_smooth()+
 #   labs(title="Words produced per round per player", y="words")
 
-ggplot(chat_by_pair, aes(x=repNum, y=words, color=gametype))+geom_jitter(width=.1, size=1, alpha=.2)+facet_grid(mix~gametype)+scale_y_continuous(limits=c(0,30))+
+ggplot(chat_by_pair, aes(x=repNum, y=words, color=gametype))+geom_jitter(width=.1, size=1, alpha=.2)+facet_grid(mix~gametype)+coord_cartesian(ylim=c(0,15))+
   geom_smooth()+
-  labs(title="Words produced per round per game", y="words")
+      theme(axis.text=element_text(size=12), 
+        axis.title=element_text(size=14),
+        strip.text=element_text(size=14),
+        legend.position = "none")+labs(y="Words / pair / trial", x="Trial number")
 
+ggsave(here(image_location, 'words.png'), width=5, height=3.5, device="png", type="cairo-png")
+
+```
+
+```{r}
 ggplot(is_chat, aes(x=repNum, y=pct_chat, color=gametype))+geom_point()+
   facet_grid(gametype~mix)+
   labs(y="pct of games who said anything each round")
+```
+
+```{r}
+# per game
+chatty <- game_chat %>% group_by(gameId, playerId, gametype,  mix, repNum) %>% mutate(did.chat=ifelse(words>0, 1,0))
+
+game_chatty <- chatty %>% group_by(gameId, gametype,mix, repNum)
 ```
 
 # Does chat help? 
@@ -251,7 +289,7 @@ We look at how many rounds had non-zero chat (of those with the option to chat) 
 ```{r}
 success <- rounds %>% filter(chat_cond=="chat") %>% select(playerId, gameId, gametype, mix, payoff) %>% inner_join(chat_by_pair) %>% mutate(is.chat=ifelse(words>0, 1,0)) %>% group_by(gameId, gametype, mix) %>% summarize(mean_payout=mean(payoff), mean_chat=mean(is.chat))
 
-ggplot(success, aes(x=mean_chat, y=mean_payout, color=gametype))+geom_point()+facet_wrap(~mix)
+ggplot(success, aes(x=mean_chat, y=mean_payout, color=gametype))+geom_point()+facet_wrap(~mix)+geom_smooth(method="lm")
 
 ```
 
@@ -289,3 +327,74 @@ ggplot(outcome_summary %>% filter((is.chat)==0), aes(x=repNum, y=pct))+
   geom_point(size=1)+
   facet_grid(str_c(gametype,mix)~outcome)+labs(title="Rounds that could use chat but didn't")
 ```
+
+# But what about language?
+
+```{r}
+
+game_chat <- chat %>% filter(chat_cond=="chat") %>% filter(!is.na(targets)) %>% select(-type) %>% left_join(rounds) %>% filter(!is.na(text)) %>% select(gameId,playerId, gametype,mix,repNum,text)
+  
+per_game <- chat %>% filter(chat_cond=="chat") %>% filter(!is.na(targets)) %>% select(-type) %>% left_join(rounds) %>% filter(!is.na(text)) %>% select(gameId,role, gametype,mix,repNum,text) %>%  mutate(game_cond=ifelse(mix=="pure", gametype, "mix"),
+         words=str_count(text, "\\w+") %|% int(0)) %>% 
+  filter(words>0) %>% 
+  group_by(gameId,role,game_cond) %>% summarize(total_words=sum(words),total_utts=n()) %>% 
+  pivot_wider(names_from=role, values_from=c(total_words, total_utts), values_fill=0) %>% 
+  mutate(words_1=max(total_words_p1, total_words_p2),
+         words_2=min(total_words_p1, total_words_p2),
+         utts_1=max(total_utts_p1, total_utts_p2),
+         utts_2=min(total_utts_p1, total_utts_p2))
+
+words <- per_game %>% ungroup() %>% group_by(game_cond) %>% 
+  select(gameId,game_cond, total_words_p1, total_words_p2) %>% 
+  mutate(total=total_words_p1+total_words_p2,
+         n=row_number()) %>% 
+  pivot_longer(total_words_p1:total_words_p2)
+
+  ggplot(words,aes(x=reorder(n,total),y=value, fill=name))+geom_col()+facet_grid(game_cond~.)
+```
+
+So, types of language that could occur:
+- chitchat 
+- negotiation about strategy/ who gets to pick
+- someone naming / proposing a color to choose 
+- agreement / "ok"
+- other: discussion of mistakes, etc
+
+Could hand code a bunch of this -- spelling correction might be good for detecting color words!
+```{r}
+color_words <- c("red","blue", "green","pink","yellow","gray","grey","salmon","cyan","purple",
+                 "orange","white","brown","rose")
+
+agreement <- c("ok","yup","yes","yep","yea","okay")
+color_coded <- game_chat %>% select(text) %>%
+  mutate(has.color=str_detect(text, regex(paste(color_words, collapse="|"), ignore_case=T)),
+         is.color=ifelse(str_replace_all(text, "[^[:alnum:]]", "") %>% str_to_lower() %in% color_words, T,F),
+         is.ok = ifelse(str_replace_all(text, "[^[:alnum:]]", "") %>% str_to_lower() %in% agreement, T,F))
+                                                     
+
+color_coded %>% group_by(has.color,is.ok, is.color) %>% tally()
+```
+
+```{r}
+agreement <- c("ok","yup","yes","yep","yea","okay")
+
+color_pure <- read_csv(here("data/colorpure.csv"), guess_max = 2000) %>% mutate(gametype=game_cond)
+color_mixed <- read_csv(here("data/colormixed.csv"), guess_max=2000)
+
+color <- color_pure %>% union(color_mixed) %>% filter(!is.na(targets)) %>% filter(!is.na(text)) %>% 
+  mutate(is.color=ifelse(is.na(color),0,1), 
+         is.num= ifelse(str_detect(text, regex("[0-9]", ignore_case=T)),1,0),
+         is.ok = ifelse(str_replace_all(text, "[^[:alnum:]]", "") %>% str_to_lower() %in% agreement, 1,0)) %>% group_by(game_cond) %>% summarize(c=mean(is.color),num=mean(is.num),ok=mean(is.ok), total=n())
+```
+# Are they human?
+
+```{r bot}
+
+exit %>% 
+  group_by(game_cond, chat_cond, human) %>% 
+  tally() %>% 
+  pivot_wider(names_from=human, values_from=n) %>% 
+  mutate(pct=yes/(no+yes))
+
+```
+
