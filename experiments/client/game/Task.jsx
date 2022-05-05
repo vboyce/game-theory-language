@@ -69,14 +69,16 @@ export default class Task extends React.Component {
 
     }
     const otherPlayer = _.reject(game.players, p => p._id === player._id)[0]
+    
     const t1=targets[0]
     const t2=targets[1]
     let selfrole=player.get("role")
     let otherrole=otherPlayer.get("role")
     const payoffs=round.get("payoffs")
     const r11=this.renderReward(payoffs[t1.label+t1.label], player, otherPlayer)
-    const r12=this.renderReward(payoffs[t1.label+t2.label], player, otherPlayer)
-    const r21=this.renderReward(payoffs[t2.label+t1.label], player, otherPlayer)
+    // if player2, need to transpose the table!
+    const r12=selfrole=="p1"?this.renderReward(payoffs[t1.label+t2.label], player, otherPlayer):this.renderReward(payoffs[t2.label+t1.label], player, otherPlayer)
+    const r21=selfrole=="p1"?this.renderReward(payoffs[t2.label+t1.label], player, otherPlayer):this.renderReward(payoffs[t1.label+t2.label], player, otherPlayer)
     const r22=this.renderReward(payoffs[t2.label+t2.label], player, otherPlayer)
     const instr2 = stage.name=="selection" ? "Click on the box you want to open.":
       "You got "+player.get("scoreIncrement")+ " points!"
