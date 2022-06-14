@@ -168,9 +168,23 @@ game_convergence <- M_mat %>%
          earlierRep=ifelse(repNum_1>repNum_2,repNum_2,repNum_1),
          samePlayer=ifelse(playerId_1==playerId_2,1,0)) %>% 
   mutate(sim = ifelse(is.nan(sim), NA, sim)) %>%
+  filter(!is.na(samePlayer)) %>% 
   ungroup()
 
+```
 
+0 is not same speaker, 1 is same speaker.
+
+```{r}
+game_convergence %>% filter(repDist<5) %>% ggplot(aes(x=earlierRep, y=sim, color=repDist))+geom_point(alpha=.1)+geom_smooth()+facet_grid(game_cond~samePlayer)+labs(title="Rep distance <5")
+
+game_convergence %>% ggplot(aes(x=repDist, y=sim, color=earlierRep))+geom_point(alpha=.01)+geom_smooth()+facet_grid(game_cond~samePlayer)
+
+```
+
+We're not really seeing much, similarity is higher in rounds that are closer together, but if we only look at relatively close reps (within 5 of each other), there's not much by way of pattern.
+
+```{r, eval=F}
 m_convergence <- lmer(sim ~ repDist*game_cond+samePlayer+earlierRep*game_cond + (1|gameId), data=game_convergence)
 
 summary(m_convergence)
@@ -197,7 +211,18 @@ game_divergence <- M_mat %>%
          earlierRep=ifelse(repNum_1>repNum_2,repNum_2,repNum_1)) %>% 
   mutate(sim = ifelse(is.nan(sim), NA, sim)) %>%
   ungroup()
+```
 
+```{r}
+game_divergence %>% filter(repDist==0) %>% ggplot(aes(x=earlierRep, y=sim))+geom_point(alpha=.1)+geom_smooth()+facet_grid(game_cond~.)+labs(title="Rep distance == 0")
+
+game_divergence %>% ggplot(aes(x=repDist, y=sim, color=earlierRep))+geom_point(alpha=.01)+geom_smooth()+facet_grid(game_cond~.)
+
+```
+
+Not seeing anything useful here.
+
+```{r, eval=F}
 
 m_divergence <- lm(sim ~ repDist*game_cond+earlierRep*game_cond, data=game_convergence)
 
