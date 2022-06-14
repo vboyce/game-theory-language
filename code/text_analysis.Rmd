@@ -1,0 +1,207 @@
+---
+title: "Sbert"
+output:
+  html_document: 
+    toc: true
+---
+
+# Pre-process
+
+```{r set-up, include=F}
+knitr::opts_chunk$set(echo = FALSE, warning=F, message=F)
+knitr::opts_chunk$set(dev = "png", dev.args = list(type = "cairo-png"))
+options(knitr.table.format = "html")
+library(tidyverse)
+library(jsonlite)
+library(here)
+library(rlang)
+library(lme4)
+library(brms)
+library(rstan)
+library(viridis)
+library(knitr)
+library(tidytext)
+rstan_options(auto_write = TRUE)
+options(mc.cores = parallel::detectCores())
+theme_set(theme_bw())
+
+ParseJSONColumn <- function(x) {
+  str_c("[ ", str_c(x, collapse = ",", sep=" "), " ]")  %>% 
+    fromJSON(flatten = T)
+}
+
+##Data import constants
+data_location="data/study2_220413"
+
+date_start=lubridate::ymd('2022-04-13')
+
+study1_loc="data/study1_220107"
+image_location="write-ups/images"
+
+#model_location="code/models"
+```
+
+
+```{r comparison data}
+study1.chat <- read_csv(here(study1_loc,"raw_chat.csv")) %>% 
+    mutate(gametype=game_cond,
+         mix="pure") %>% 
+  select(gameId,text, type, repNum, playerId, chat_cond, gametype,mix, game_cond, targets)
+
+study1.rounds <- read_csv(here(study1_loc,"raw_results.csv")) %>% 
+  mutate(gametype=game_cond,
+         mix="pure") %>% 
+  select(gameId,repNum, playerId,payoff, response, time, box_A, box_B, AA, AB, BA, BB, chat_cond, gametype,mix, role)
+
+study2.chat <- read_csv(here(data_location,"raw_chat.csv")) %>% 
+  mutate(mix="mix") %>% 
+  select(gameId,text, type, repNum, playerId, chat_cond, gametype,mix, game_cond, targets)
+
+study2.rounds <- read_csv(here(data_location,"raw_results.csv")) %>% 
+  mutate(mix="mix") %>% 
+  select(gameId,repNum, playerId,payoff, response, time, box_A, box_B, AA, AB, BA, BB, chat_cond, gametype,mix, role)
+
+rounds <- study1.rounds %>% union(study2.rounds)
+chat <- study1.chat %>% union(study2.chat)
+
+
+```
+
+```{r prep}
+
+raw_text <- chat %>% left_join(rounds) %>% 
+  filter(!is.na(repNum)) %>% 
+  filter(!is.na(text)) %>% 
+  select(gameId,repNum,text, playerId, gametype,mix,game_cond,box_A,box_B,payoff,response,AA,AB,BA,BB) %>% 
+  unnest_tokens(sentence, input=text, token="sentences") %>% 
+  filter(!is.na(sentence))
+
+
+#sample <- raw_text %>% filter(gameId=="3WzEi9zkHF77vdTw5") %>% write_csv("sample.csv")
+pre_sbert <- raw_text %>% write_csv("pre_sbert.csv")
+```
+
+# Interlude
+This is where they need to get embedding with jupyter
+
+# Post-wrangle
+
+```{r, include=F, eval=F}
+library(reticulate)
+np <- import("numpy")
+mat = np$load('post_sbert.npy')
+saveRDS(mat,'post_sbert.RData')
+```
+
+```{r, include=F,}
+ssb <- pre_sbert %>% bind_cols(readRDS('post_sbert.RData')  %>% as_tibble())
+
+
+grouped <- ssb %>%
+  group_by(gameId,repNum, playerId, gametype,mix,game_cond,box_A,box_B,payoff,response,AA,AB,BA,BB) %>% 
+  summarize(across(starts_with('V'), mean)) %>% 
+  ungroup() 
+
+F_mat <- grouped %>% select(starts_with("V")) %>% as.matrix() #Features
+M_mat <- grouped %>% select(-starts_with("V")) %>% mutate(feature_ind=row_number())
+```
+
+We average across vectors for what each person said each rep. 
+
+```{r helpers}
+# note: cor expects features to be in columns so we transpose
+get_sim_matrix = function(df, F_mat, method = 'cosine') {
+  feats = F_mat[df$feature_ind,]
+  if(method == 'cor') {
+    return(cor(t(feats), method = 'pearson'))
+  } else if (method == 'euclidean') {
+    return(as.matrix(dist(feats, method = 'euclidean')))
+  } else if (method == 'cosine') {
+    return(as.matrix(lsa::cosine(t(feats))))
+  } else {
+    stop(paste0('unknown method', method))
+  }
+}
+
+# note this does de-duplicated version
+flatten_sim_matrix <- function(cormat, ids) {
+  ut <- upper.tri(cormat)
+  data.frame(
+    dim1 = ids[row(cormat)[ut]],
+    dim2 = ids[col(cormat)[ut]],
+    sim  = as.numeric(cormat[ut])
+  ) %>%
+    mutate(dim1 = as.character(dim1),
+           dim2 = as.character(dim2))
+}
+
+make_within_df <- function(M_mat, F_mat, method) {
+  M_mat %>%
+    do(flatten_sim_matrix(get_sim_matrix(., F_mat, method = method),
+                          .$repNum)) %>%
+    mutate(rep1 = as.numeric(dim1), 
+           rep2 = as.numeric(dim2)) 
+}
+
+make_across_df <- function(M_mat, F_mat, method) {
+  M_mat %>%
+    do(flatten_sim_matrix(get_sim_matrix(., F_mat, method = method),
+                          as.character(.$combinedId)))
+}
+```
+
+# Analysis
+
+## Convergence within groups
+
+look within a game, across all reps and playerIDs
+
+```{r }
+
+game_convergence <- M_mat %>% 
+  group_by(gameId,game_cond) %>% 
+  mutate(combinedId=str_c(playerId,repNum,sep="_")) %>% 
+  make_across_df(F_mat, 'cosine') %>% 
+  separate(dim1, into=c("playerId_1","repNum_1"), convert=T, sep="_") %>% 
+  separate(dim2, into=c("playerId_2","repNum_2"), convert=T, sep="_") %>% 
+  mutate(repDist=abs(repNum_1-repNum_2),
+         earlierRep=ifelse(repNum_1>repNum_2,repNum_2,repNum_1),
+         samePlayer=ifelse(playerId_1==playerId_2,1,0)) %>% 
+  mutate(sim = ifelse(is.nan(sim), NA, sim)) %>%
+  ungroup()
+
+
+m_convergence <- lmer(sim ~ repDist*game_cond+samePlayer+earlierRep*game_cond + (1|gameId), data=game_convergence)
+
+summary(m_convergence)
+```
+
+Unclear what interactions we should be including. 
+
+repDistance: reps that are further apart from each other are less similar (note this is confounded w/ earlier rep)
+
+being said by the same person increases similarity
+
+## Divergence between groups
+
+```{r }
+
+game_divergence <- M_mat %>% 
+  group_by(game_cond) %>% 
+  mutate(combinedId=str_c(gameId,repNum,sep="_")) %>% 
+  make_across_df(F_mat, 'cosine') %>% 
+  separate(dim1, into=c("gameId_1","repNum_1"), convert=T, sep="_") %>% 
+  separate(dim2, into=c("gameId_2","repNum_2"), convert=T, sep="_") %>% 
+  filter(gameId_1!=gameId_2) %>% 
+  mutate(repDist=abs(repNum_1-repNum_2),
+         earlierRep=ifelse(repNum_1>repNum_2,repNum_2,repNum_1)) %>% 
+  mutate(sim = ifelse(is.nan(sim), NA, sim)) %>%
+  ungroup()
+
+
+m_divergence <- lm(sim ~ repDist*game_cond+earlierRep*game_cond, data=game_convergence)
+
+summary(m_divergence)
+```
+
+There's more difference the further apart the reps are, and maybe slight differences between the game types, but we're not seeing the clear divergence patterns that arise in say tangrams. (Which makes sense if groups are mostly converging on a limited number of patterns we wouldn't expect difference between them.)
