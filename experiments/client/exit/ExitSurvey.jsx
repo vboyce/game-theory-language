@@ -34,6 +34,7 @@ export default class ExitSurvey extends React.Component {
         chatUseful: "",
         feedback: "",
         time: "",
+        strategy:""
     };
 
     handleChange = (event) => {
@@ -71,6 +72,7 @@ export default class ExitSurvey extends React.Component {
             chatUseful,
             feedback,
             time,
+            strategy
         } = this.state;
 
         return (
@@ -301,6 +303,27 @@ export default class ExitSurvey extends React.Component {
                             </RadioGroup>
                         </div>
                     </div>
+
+                    <div className="form-line thirds">
+
+<FormGroup
+    className={"form-group"}
+    inline={false}
+    label={"What was your strategy for this game?"}
+    labelFor={"strategy"}
+    //className={"form-group"}
+>
+    <TextArea
+        id="strategy"
+        name="strategy"
+        large={true}
+        intent={Intent.PRIMARY}
+        onChange={this.handleChange}
+        value={strategy}
+        fill={true}
+    />
+</FormGroup>
+</div>
 
                     <div className="form-line thirds">
 

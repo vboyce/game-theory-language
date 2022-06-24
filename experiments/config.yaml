@@ -1,103 +1,4 @@
 treatments:
-  - factorIds:
-      - Y4n3qhKoeq4zhJM7j
-    archivedAt: 2021-10-07T01:23:06.587Z
-  - factorIds:
-      - Y4n3qhKoeq4zhJM7j
-      - unc4YJsyGSfHZ5xnL
-    archivedAt: 2021-10-07T01:45:42.110Z
-  - name: version1
-    factorIds:
-      - Y4n3qhKoeq4zhJM7j
-      - unc4YJsyGSfHZ5xnL
-      - FEFRwnPwLHhYCD2hp
-      - ExGyqo24cvXdSua6D
-    archivedAt: 2022-01-05T22:53:21.609Z
-  - name: version2chatty
-    factorIds:
-      - Y4n3qhKoeq4zhJM7j
-      - unc4YJsyGSfHZ5xnL
-      - FEFRwnPwLHhYCD2hp
-      - ExGyqo24cvXdSua6D
-      - Ck939g7C5nwMzfGo9
-    archivedAt: 2022-01-05T22:53:22.719Z
-  - name: pilot
-    factorIds:
-      - Y4n3qhKoeq4zhJM7j
-      - unc4YJsyGSfHZ5xnL
-      - FEFRwnPwLHhYCD2hp
-      - szoQvyeBFJtD3bkAd
-      - Ck939g7C5nwMzfGo9
-      - 9ehWEoaCiFP7G7oWN
-    archivedAt: 2022-01-05T22:53:23.265Z
-  - name: BoSpilot1
-    factorIds:
-      - Y4n3qhKoeq4zhJM7j
-      - Gh2rD5yXcdPNSJ33F
-      - FEFRwnPwLHhYCD2hp
-      - szoQvyeBFJtD3bkAd
-      - Ck939g7C5nwMzfGo9
-      - 9ehWEoaCiFP7G7oWN
-      - gH3kSrDqrmT3Tot3o
-    archivedAt: 2022-01-05T22:53:23.831Z
-  - name: BoSpilot2
-    factorIds:
-      - Y4n3qhKoeq4zhJM7j
-      - Gh2rD5yXcdPNSJ33F
-      - FEFRwnPwLHhYCD2hp
-      - szoQvyeBFJtD3bkAd
-      - Ck939g7C5nwMzfGo9
-      - 9ehWEoaCiFP7G7oWN
-      - gH3kSrDqrmT3Tot3o
-      - SyoMcXXQzA43ownGc
-    archivedAt: 2022-01-05T23:12:58.363Z
-  - name: BoSpilotsilent
-    factorIds:
-      - Y4n3qhKoeq4zhJM7j
-      - Gh2rD5yXcdPNSJ33F
-      - FEFRwnPwLHhYCD2hp
-      - szoQvyeBFJtD3bkAd
-      - PepMakdXcmDjFDGPd
-      - 9ehWEoaCiFP7G7oWN
-      - gH3kSrDqrmT3Tot3o
-      - SyoMcXXQzA43ownGc
-    archivedAt: 2022-01-05T23:12:59.888Z
-  - name: test-sPD
-    factorIds:
-      - Y4n3qhKoeq4zhJM7j
-      - 66hs3Wzvpx2BgSpqa
-      - FEFRwnPwLHhYCD2hp
-      - szoQvyeBFJtD3bkAd
-      - PepMakdXcmDjFDGPd
-      - 9ehWEoaCiFP7G7oWN
-      - gH3kSrDqrmT3Tot3o
-      - 4Kgro6vfFJKvXwvHi
-      - THvkveENcj2DnebPQ
-    archivedAt: 2022-01-05T23:14:40.605Z
-  - name: test-sB
-    factorIds:
-      - v3j7zHpjRWYPTXdsP
-      - 4Kgro6vfFJKvXwvHi
-      - gH3kSrDqrmT3Tot3o
-      - 9ehWEoaCiFP7G7oWN
-      - PepMakdXcmDjFDGPd
-      - szoQvyeBFJtD3bkAd
-      - FEFRwnPwLHhYCD2hp
-      - 66hs3Wzvpx2BgSpqa
-      - Y4n3qhKoeq4zhJM7j
-    archivedAt: 2022-01-05T23:14:41.464Z
-  - name: test-CB
-    factorIds:
-      - Y4n3qhKoeq4zhJM7j
-      - 66hs3Wzvpx2BgSpqa
-      - FEFRwnPwLHhYCD2hp
-      - szoQvyeBFJtD3bkAd
-      - Ck939g7C5nwMzfGo9
-      - 9ehWEoaCiFP7G7oWN
-      - gH3kSrDqrmT3Tot3o
-      - 4Kgro6vfFJKvXwvHi
-      - v3j7zHpjRWYPTXdsP
-    archivedAt: 2022-01-05T23:14:41.981Z
   - name: BoS+chat
     factorIds:
       - Y4n3qhKoeq4zhJM7j
@@ -153,6 +54,28 @@ treatments:
       - gH3kSrDqrmT3Tot3o
       - W2AWmCBSdBtW4fxbK
       - vjzsFoxTqT34aTq3Q
+  - name: testspike
+    factorIds:
+      - Y4n3qhKoeq4zhJM7j
+      - Gh2rD5yXcdPNSJ33F
+      - yAMuDMouXY7ric4vx
+      - W2AWmCBSdBtW4fxbK
+      - gH3kSrDqrmT3Tot3o
+      - 9ehWEoaCiFP7G7oWN
+      - Ck939g7C5nwMzfGo9
+      - szoQvyeBFJtD3bkAd
+      - FEFRwnPwLHhYCD2hp
+  - name: testjun23
+    factorIds:
+      - Y4n3qhKoeq4zhJM7j
+      - jwJH2sx2YACTjNtnA
+      - FEFRwnPwLHhYCD2hp
+      - szoQvyeBFJtD3bkAd
+      - Ck939g7C5nwMzfGo9
+      - 9ehWEoaCiFP7G7oWN
+      - ts6CYnhbrNXpMPHeu
+      - W2AWmCBSdBtW4fxbK
+      - yAMuDMouXY7ric4vx
 factorTypes:
   - _id: uHfhghtEwZziux7D8
     name: playerCount
@@ -219,20 +142,10 @@ factors:
     name: '2'
     value: 2
     factorTypeId: uHfhghtEwZziux7D8
-  - _id: unc4YJsyGSfHZ5xnL
-    name: '20'
-    value: 20
-    factorTypeId: oubFC8JR4ANaCoHQd
-    archivedAt: 2022-01-05T22:53:11.504Z
   - _id: FEFRwnPwLHhYCD2hp
     name: '180'
     value: 180
     factorTypeId: BA7H73tQkEWRLTEDd
-  - _id: ExGyqo24cvXdSua6D
-    name: '3'
-    value: 3
-    factorTypeId: 35Zk8gACoSRTYnQcS
-    archivedAt: 2022-01-05T22:53:08.645Z
   - _id: Ck939g7C5nwMzfGo9
     name: 'true'
     value: true
@@ -269,16 +182,6 @@ factors:
     name: PD
     value: PD
     factorTypeId: fJjrnb5phcSwW3bXs
-  - _id: 66hs3Wzvpx2BgSpqa
-    name: test
-    value: 5
-    factorTypeId: oubFC8JR4ANaCoHQd
-    archivedAt: 2022-01-05T23:13:16.036Z
-  - _id: 4Kgro6vfFJKvXwvHi
-    name: test
-    value: 30
-    factorTypeId: K3gC4XkPePZNhoctg
-    archivedAt: 2022-01-05T23:13:19.683Z
   - _id: vjzsFoxTqT34aTq3Q
     name: mixPDBoS
     value: mixPDBoS
@@ -287,6 +190,18 @@ factors:
     name: test
     value: 5
     factorTypeId: K3gC4XkPePZNhoctg
+  - _id: yAMuDMouXY7ric4vx
+    name: spikeMix
+    value: spikeMix
+    factorTypeId: fJjrnb5phcSwW3bXs
+  - _id: ts6CYnhbrNXpMPHeu
+    name: onePointFive
+    value: 1.5
+    factorTypeId: uR3hqbNaW2YJSTQcd
+  - _id: jwJH2sx2YACTjNtnA
+    name: testtest
+    value: 1
+    factorTypeId: oubFC8JR4ANaCoHQd
 lobbyConfigs:
   - timeoutType: lobby
     timeoutInSeconds: 300
