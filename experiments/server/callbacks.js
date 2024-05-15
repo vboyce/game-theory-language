@@ -1,5 +1,11 @@
 import Empirica from "meteor/empirica:core";
-import {names, avatarNames, nameColors, targets, payoffs} from './constants.js';
+import {
+  names,
+  avatarNames,
+  nameColors,
+  targets,
+  payoffs,
+} from "./constants.js";
 import _, { pick } from "lodash";
 
 // //// Avatar stuff //////
@@ -11,10 +17,11 @@ Empirica.onGameStart((game) => {
   const players = game.players;
   console.debug("game ", game._id, " started");
 
-  const roleList = game.get('roleList');
+  const roleList = game.get("roleList");
   //const targets = game.get('context');
 
   players.forEach((player, i) => {
+    player.set("bonus_log", []);
     player.set("role", roleList[player._id]);
     player.set("name", names[i]);
     player.set("avatar", `/avatars/jdenticon/${avatarNames[i]}`);
@@ -27,19 +34,19 @@ Empirica.onGameStart((game) => {
 // It receives the same options as onGameStart, and the round that is starting.
 Empirica.onRoundStart((game, round) => {
   const players = game.players;
-  round.set("chat", []); 
+  round.set("chat", []);
   //round.set("countCorrect",0);
   //round.set('speaker', "")
-  round.set('submitted', false);
-  players.forEach(player => {
+  round.set("submitted", false);
+  players.forEach((player) => {
     //player.set('role', player.get('roleList')[round.index])
     // if (player.get('role')=="speaker"){
     //   round.set('speaker', player._id)
     // }
     player.set("targets", _.shuffle(round.get("targets")));
 
-    player.set('clicked', false);
-    player.set("scoreIncrement",0)
+    player.set("clicked", false);
+    player.set("scoreIncrement", 0);
   });
   //console.log(round)
   //console.log(players)
@@ -62,37 +69,67 @@ Empirica.onStageStart((game, round, stage) => {
 // onStageEnd is triggered after each stage.
 // It receives the same options as onRoundEnd, and the stage that just ended.
 Empirica.onStageEnd((game, round, stage) => {
-  if (stage.name=="selection"){
-    const scale=game.treatment.scale
+  if (stage.name == "selection") {
+    const scale = game.treatment.scale;
     const players = game.players;
-    const p1 = _.find(game.players, p => p.get('role') === "p1");
-    const p2 = _.find(game.players, p => p.get('role') === "p2");
+    const p1 = _.find(game.players, (p) => p.get("role") === "p1");
+    const p2 = _.find(game.players, (p) => p.get("role") === "p2");
     //TODO what happens if someone doesn't click!!!!
-    if (p1.get("clicked") && p2.get("clicked")){
-    const outcome=p1.get("clicked")+p2.get("clicked")
-    console.log(outcome)
-    const payout=round.get("payoffs")[outcome]
-    console.log(payout)
-    p1.set("scoreIncrement",payout.p1)
-    p2.set("scoreIncrement",payout.p2)
-    //Save outcomes as property of round for later export/analysis
-    players.forEach(player => {
-      const currScore=player.get("bonus")
-      const scoreIncrement=player.get("scoreIncrement")
-      player.set("bonus", scoreIncrement*.01*scale + currScore);
-      round.set('player_' + player._id + '_response', player.get('clicked'));
-      round.set('player_' + player._id + '_time', player.stage.submittedAt-stage.startTimeAt);
-      round.set('player_' + player._id + '_payoff', player.get('scoreIncrement'));
-      round.set('player_' + player._id + '_role', player.get('role'));
-    });
+    if (p1.get("clicked") && p2.get("clicked")) {
+      const outcome = p1.get("clicked") + p2.get("clicked");
+      console.log(outcome);
+      const payout = round.get("payoffs")[outcome];
+      console.log(payout);
+      p1.set("scoreIncrement", payout.p1);
+      p2.set("scoreIncrement", payout.p2);
+      //Save outcomes as property of round for later export/analysis
+      const bonus_trials = [7, 15, 32, 38];
+      //const bonus_trials = [0, 1, 2, 3];
+      if (bonus_trials.includes(round.get("repNum"))) {
+        console.log(round.get("repNum"));
+        let bonus_p1 = {
+          rep: round.get("repNum"),
+          own: payout.p1,
+          partner: payout.p2,
+        };
+        let bonus_p2 = {
+          rep: round.get("repNum"),
+          own: payout.p2,
+          partner: payout.p1,
+        };
+        let p2_old_bonus = p2.get("bonus_log");
+        let p1_old_bonus = p1.get("bonus_log");
+        p2_old_bonus.push(bonus_p2);
+        p1_old_bonus.push(bonus_p1);
+        p2.set("bonus_log", p2_old_bonus);
+        p1.set("bonus_log", p1_old_bonus);
+        players.forEach((player) => {
+          const currScore = player.get("bonus");
+          const scoreIncrement = player.get("scoreIncrement");
+          player.set("bonus", scoreIncrement * 0.1 + currScore);
+        });
+      }
+      players.forEach((player) => {
+        //const currScore=player.get("bonus")
+        const scoreIncrement = player.get("scoreIncrement");
+        //player.set("bonus", scoreIncrement*.01*scale + currScore);
+        round.set("player_" + player._id + "_response", player.get("clicked"));
+        round.set(
+          "player_" + player._id + "_time",
+          player.stage.submittedAt - stage.startTimeAt
+        );
+        round.set(
+          "player_" + player._id + "_payoff",
+          player.get("scoreIncrement")
+        );
+        round.set("player_" + player._id + "_role", player.get("role"));
+      });
+    }
   }
-}
 });
 
 // onRoundEnd is triggered after each round.
-Empirica.onRoundEnd((game, round) => {
-  
-});
+Empirica.onRoundEnd((game, round) => {});
 
 // onRoundEnd is triggered when the game ends.
 // It receives the same options as onGameStart.

@@ -18,12 +18,12 @@
 }
 
 .transition {
-    width: 50%;
-    margin: 0 auto;
+  width: 50%;
+  margin: 0 auto;
 
-    h3 {
-        font-weight: 100;
-    }
+  h3 {
+    font-weight: 100;
+  }
 }
 
 .round {
@@ -56,60 +56,55 @@
     flex-shrink: 1;
 
     .roleIndicator {
-        text-align: center;
-        font-size: x-large;
-    }
-    
-    .turing {
-      
       text-align: center;
       font-size: x-large;
-      
+    }
 
-      .list{
+    .turing {
+      text-align: center;
+      font-size: x-large;
+
+      .list {
         text-align: left;
         font-size: large;
       }
-  }
-    .payoffTable{
+    }
+    .payoffTable {
       //width: 100%;
       margin-left: auto;
       margin-right: auto;
       border-collapse: collapse;
       text-align: center;
       font-size: x-large;
-      
-      .empty{
+
+      .empty {
         border-style: none;
       }
 
-      .target{
+      .target {
         img {
           width: 7vw;
           height: 7vw;
         }
-
       }
 
-      .player{
+      .player {
         vertical-align: middle;
         img {
           width: 7vw;
           height: 7vw;
         }
-
       }
-      .reward{
+      .reward {
         border-style: solid;
         font-size: xx-large;
       }
-      
     }
 
     .all-tangrams {
       display: flex;
       flex-direction: row;
-      width:100%;
+      width: 100%;
       align-items: center;
 
       .tangram {
@@ -122,46 +117,43 @@
       .tangrams {
         display: grid;
         flex-wrap: nowrap;
-        width:100%;
+        width: 100%;
         grid-gap: 20px;
         justify-content: center;
         //max-width:100%;
 
         .tangram {
-            width : 15vw;
-            height : 15vw;
-            max-width: 20vh;
-            max-height: 20vh;
-            flex-grow: 0;
-            flex-shrink: 5;
-            margin: 1rem;
-            justify-content: start;
-            cursor: pointer;
+          width: 15vw;
+          height: 15vw;
+          max-width: 20vh;
+          max-height: 20vh;
+          flex-grow: 0;
+          flex-shrink: 5;
+          margin: 1rem;
+          justify-content: start;
+          cursor: pointer;
 
-            .feedback{
-              align-self: start;
-              padding: 0rem;
-              text-align: left;
+          .feedback {
+            align-self: start;
+            padding: 0rem;
+            text-align: left;
 
-            img{
+            img {
               height: 5vw;
               width: 5vw;
               max-width: 4vh;
               max-height: vh;
               background-color: white;
             }
-              
-              
-
-            }
+          }
         }
       }
     }
     .feedbackIndicator {
-        text-align: center;
-        font-weight: 100;
+      text-align: center;
+      font-weight: 100;
     }
-    
+
     .response {
       padding: 3rem 0;
       text-align: center;
@@ -184,22 +176,23 @@
   .status {
     display: flex;
     flex-shrink: 0;
-
     padding: 0 0.5rem;
     height: 11rem;
     margin-bottom: 1rem;
 
     .players {
       padding: 0;
-      display: flex;
       width: 100%;
+      display: flex;
       // overflow allows for the user to scroll through
       overflow: auto;
+      margin: auto;
 
       .player {
         display: flex;
         flex-direction: column;
         align-items: center;
+        margin: auto;
         padding: 1rem;
 
         .image {
@@ -238,26 +231,27 @@
     }
 
     .timer {
-        padding-top: 1.5rem;
-        text-align: center;
-        width:50%;
+      padding-top: 1.5rem;
+      text-align: center;
+      width: 100%;
+      margin: auto;
 
+      .seconds {
+        color: green;
+        font-size: 2.7rem;
+        font-weight: bold;
+      }
+
+      &.lessThan10 {
         .seconds {
-            color: green;
-            font-size: 2.7rem;
-            font-weight: bold;
+          color: orange;
         }
-
-        &.lessThan10 {
-            .seconds {
-                color: orange;
-            }
+      }
+      &.lessThan5 {
+        .seconds {
+          color: red;
         }
-        &.lessThan5 {
-            .seconds {
-                color: red;
-            }
-        }
+      }
     }
 
     .total-score {
@@ -337,7 +331,7 @@
       }
 
       .message {
-          font-size: 1.7rem;
+        font-size: 1.7rem;
         margin: 0 0 1rem;
 
         .author {
@@ -384,17 +378,16 @@
     margin-bottom: 1em;
   }
 
-  .image{
-    max-width:100%;
-    img{
-      width:80%;
+  .image {
+    max-width: 100%;
+    img {
+      width: 80%;
     }
   }
 
-  .smallimage{
-    max-width:80%;
-    img{
-      
+  .smallimage {
+    max-width: 80%;
+    img {
     }
   }
   .players {
@@ -445,7 +438,6 @@
       }
     }
   }
-  
 }
 
 .exit-survey {
@@ -476,5 +468,12 @@
         }
       }
     }
+  }
+}
+
+.exit {
+  th,
+  td {
+    padding: 15px;
   }
 }

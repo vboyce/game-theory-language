@@ -281,6 +281,13 @@ exit %>%
 
 Yay, they mostly think they're human!!
 
+# What is said in chat
+
+```{r}
+chat |> filter(!is.na(gametype)) |> filter(!is.na(text)) |> View()
+
+```
+
 # Chat and payoff
 
 We look at how many rounds had non-zero chat (of those with the option to chat) compared to mean payoff.
