@@ -8,6 +8,7 @@ import Empirica from "meteor/empirica:core";
 import Consent from "./intro/Consent.jsx";
 import Payment from "./intro/Payment.jsx";
 import Overview from "./intro/Overview.jsx";
+import Bonus from "./intro/Bonus.jsx";
 import SocialInteractionDetails from "./intro/SocialInteractionDetails.jsx";
 import MoreAboutBonus from "./intro/MoreAboutBonus.jsx";
 import UIOverview from "./intro/UIOverview.jsx";
@@ -23,16 +24,16 @@ import customBreadcrumb from "./game/Breadcrumb.jsx";
 Empirica.header(() => null);
 
 // Set the Consent Component you want to present players (optional).
-//Empirica.consent(Consent);
+Empirica.consent(Consent);
 
 // Introduction pages to show before they play the game (optional).
 // At this point they have been assigned a treatment. You can return
 // different instruction steps depending on the assigned treatment.
 Empirica.introSteps((game, treatment) => {
-  const steps = [Payment, Overview];
+  const steps = [Payment, Overview, Bonus];
 
-  //return steps;
-  return [];
+  return steps;
+  //return [];
 });
 
 // The Round component containing the game UI logic.

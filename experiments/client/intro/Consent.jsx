@@ -13,6 +13,7 @@ export default class Consent extends React.Component {
               <img width="300px" src="/experiment/stanford.png" />
             </center>
           </div>
+          <br></br>
           <p>
             If you agree to take part in the research, you will play a series of
             games with other participants. This study will take approximately 15
@@ -64,7 +65,8 @@ export default class Consent extends React.Component {
     const browserHandler = {
       default: (browser) =>
         browser === "firefox"
-          ? this.renderNoFirefox()
+          ? //this.renderNoFirefox()
+            Consent.renderConsent()
           : Consent.renderConsent(),
     };
 
