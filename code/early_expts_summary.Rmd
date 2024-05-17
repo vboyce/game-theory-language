@@ -1,0 +1,573 @@
+---
+title: "Summary of 2022 experiments"
+output:
+  html_document: 
+    toc: true
+---
+
+# Conditions
+All experiments did both language and no language versions as a between groups manipulation. 
+
+[Expt 1](https://osf.io/8fnze): all PD v all BoS (between subjects)
+ - PD from sampling 3 values 1-9, 0 for lowest (sucker payoff)
+ - BoS: off diagonal payoff of 1, others from 2-9
+
+[Expt 2](https://osf.io/5au2r): mix of PD and BoS 
+ - PD from sampling 3 values 1-9, 0 for lowest (sucker payoff)
+ - BoS: off diagonal payoff of 1, others from 2-9
+
+[Expt 3](https://osf.io/c274z): special mix of PD and BoS (this is post bug-fix)
+
+ - 4 "spiked" BoS trials where one of the rewards is high (25-30) and the other is normal (3-7)
+ - ~16 normal BoS trials where both rewards are from [1-9]
+ - ~10 normal ("easy") PD trials where cooperating is welfare maximizing ( 2 * coop payoff greater than or equal to defect payoff). All rewards are chosen from [1-12] respecting this.
+ - ~10 “sacrifice” ("hard") PD trials where having one person defect and the other take the sucker payoff is welfare maximizing (the defect payoff is > 2 * coop payoff). All rewards are chosen from [1-12] respecting this. 
+
+Off diagonal PD rewards for expts 1 and 2 were misdisplayed for player 2. This was resolved for expt 3. 
+Note: most PD from expts 1 and 2 will pattern with "easy" PD in expt 3, but also the ones that aren't can't be trusted per error. 
+
+# Read and prep
+
+```{r set-up, include=F}
+knitr::opts_chunk$set(echo = FALSE, warning = F, message = F)
+knitr::opts_chunk$set(dev = "png", dev.args = list(type = "cairo-png"))
+options(knitr.table.format = "html")
+library(tidyverse)
+library(jsonlite)
+library(here)
+library(rlang)
+library(lme4)
+library(brms)
+library(rstan)
+library(viridis)
+library(knitr)
+
+rstan_options(auto_write = TRUE)
+options(mc.cores = parallel::detectCores())
+theme_set(theme_bw())
+
+ParseJSONColumn <- function(x) {
+  str_c("[ ", str_c(x, collapse = ",", sep = " "), " ]") %>%
+    fromJSON(flatten = T)
+}
+
+## Data import constants
+study_1_loc <- "data/study1_220107"
+study_1_date_start <- lubridate::ymd("2022-01-07")
+
+study_2_loc <- "data/study2_220413"
+study_2_date_start <- lubridate::ymd("2022-04-13")
+
+study_3_loc <- "data/study3_220627"
+study_3_date_start <- lubridate::ymd("2022-06-24")
+```
+
+Assuming for now that my pre-processing was correct then. 
+
+```{r}
+# expt 1
+one_chat <- read_csv(here(study_1_loc, "raw_chat.csv")) %>%
+  mutate(gametype = game_cond) |>
+  mutate(cond = "pure_1") |>
+  select(gameId, text, type, repNum, playerId, chat_cond, gametype, cond, targets)
+
+one_rounds <- read_csv(here(study_1_loc, "raw_results.csv")) %>%
+  mutate(gametype = game_cond) |>
+  mutate(cond = "pure_1") |>
+  select(gameId, repNum, playerId, payoff, response, time, box_A, box_B, AA, AB, BA, BB, chat_cond, gametype, cond, role)
+
+# expt 2
+two_chat <- read_csv(here(study_2_loc, "raw_chat.csv")) %>%
+  mutate(cond = "mix_2") %>%
+  select(gameId, text, type, repNum, playerId, chat_cond, gametype, cond, targets)
+
+two_rounds <- read_csv(here(study_2_loc, "raw_results.csv")) %>%
+  mutate(cond = "mix_2") %>%
+  select(gameId, repNum, playerId, payoff, response, time, box_A, box_B, AA, AB, BA, BB, chat_cond, gametype, cond, role)
+
+# expt 3
+three_chat <- read_csv(here(study_3_loc, "raw_chat.csv")) %>%
+  mutate(cond = case_when(
+    gametype == "easyPD" ~ "easy_3",
+    gametype == "hardPD" ~ "hard_3",
+    gametype == "spikeBoS" ~ "spike_3",
+    gametype == "BoS" ~ "mix_3"
+  )) |>
+  mutate(gametype = ifelse(str_detect(gametype, "PD"), "PD", "BoS")) |>
+  select(gameId, text, type, repNum, playerId, chat_cond, gametype, cond, targets)
+
+three_rounds <- read_csv(here(study_3_loc, "raw_results.csv")) %>%
+  mutate(cond = case_when(
+    gametype == "easyPD" ~ "easy_3",
+    gametype == "hardPD" ~ "hard_3",
+    gametype == "spikeBoS" ~ "spike_3",
+    gametype == "BoS" ~ "mix_3"
+  )) |>
+  mutate(gametype = ifelse(str_detect(gametype, "PD"), "PD", "BoS")) |>
+  select(gameId, repNum, playerId, payoff, response, time, box_A, box_B, AA, AB, BA, BB, chat_cond, gametype, cond, role)
+
+all_chat <- one_chat |>
+  bind_rows(two_chat) |>
+  bind_rows(three_chat) |>
+  filter(!is.na(gametype))
+all_rounds <- one_rounds |>
+  bind_rows(two_rounds) |>
+  bind_rows(three_rounds)
+```
+
+# Overall outcomes
+
+Note that points are comparable within type, but not between types. Types are named by game type _ expt number. 
+
+## Points earned
+
+```{r}
+bonuses <- all_rounds %>%
+  group_by(playerId, gameId, chat_cond, cond, gametype) %>%
+  summarize(payoff = mean(payoff))
+
+
+
+ggplot(bonuses |> filter(gametype == "PD"), aes(x = chat_cond, y = payoff, color = str_c(chat_cond))) +
+  geom_jitter(width = .1, alpha = .5) +
+  facet_grid(gametype ~ cond) +
+  scale_color_viridis(discrete = T) +
+  labs(y = "mean_reward", x = "condition") +
+  stat_summary(fun.data = "mean_cl_boot", position = position_dodge(width = .3), size = .7, color = "black") +
+  theme(legend.position = "none") +
+  coord_cartesian(ylim = c(0, 20)) +
+  labs(y = "Mean reward / trial") +
+  theme(
+    axis.text = element_text(size = 12),
+    axis.title = element_text(size = 14),
+    strip.text = element_text(size = 14)
+  )
+
+ggplot(bonuses |> filter(gametype == "BoS"), aes(x = chat_cond, y = payoff, color = str_c(chat_cond))) +
+  geom_jitter(width = .1, alpha = .5) +
+  facet_grid(gametype ~ cond) +
+  scale_color_viridis(discrete = T) +
+  labs(y = "mean_reward", x = "condition") +
+  stat_summary(fun.data = "mean_cl_boot", position = position_dodge(width = .3), size = .7, color = "black") +
+  theme(legend.position = "none") +
+  coord_cartesian(ylim = c(0, 20)) +
+  labs(y = "Mean reward / trial") +
+  theme(
+    axis.text = element_text(size = 12),
+    axis.title = element_text(size = 14),
+    strip.text = element_text(size = 14)
+  )
+```
+
+In BoS, earn more points in chat condition than no chat condition. 
+
+Minimal difference in PD. 
+
+## During chat
+
+```{r}
+game_chat <- all_chat %>%
+  filter(!is.na(targets)) %>%
+  select(-type) %>%
+  full_join(all_rounds) %>%
+  mutate(words = str_count(text, "\\W+") %|% int(0)) |>
+  group_by(gameId, gametype, cond, chat_cond, repNum) %>%
+  summarize(
+    words = sum(words),
+    mean_payout = mean(payoff),
+    is_chat = ifelse(words > 0, 1, 0)
+  )
+
+
+
+when_chat <- game_chat %>%
+  filter(chat_cond == "chat") |>
+  mutate(is.chat = ifelse(words > 0, 1, 0)) %>%
+  group_by(repNum, gametype, cond) %>%
+  summarize(pct_chat = mean(is.chat))
+
+ggplot(when_chat, aes(x = repNum, y = pct_chat, color = cond)) +
+  geom_point() +
+  facet_grid(~gametype) +
+  geom_smooth(se = F, method = "lm") +
+  labs(y = "pct of games who said anything each round")
+```
+
+In games where chat is an option, it still isn't used that much on a per trial basis. Mixing PD and BoS seems to have helped increase the talking overall. 
+
+
+## Per trial does more talking help
+
+ - chat_0 is had access to chat and didn't use on that trial
+ - chat_1 is used chat on that trial
+ - nochat_0 did not have access to chat 
+ 
+```{r}
+ggplot(game_chat |> filter(gametype == "BoS"), aes(x = str_c(chat_cond, "_", is_chat), y = mean_payout)) +
+  stat_summary(fun.data = "mean_cl_boot") +
+  facet_grid(gametype ~ cond) +
+  geom_smooth(method = "lm")
+
+ggplot(game_chat |> filter(gametype == "PD"), aes(x = str_c(chat_cond, "_", is_chat), y = mean_payout)) +
+  stat_summary(fun.data = "mean_cl_boot") +
+  facet_grid(gametype ~ cond) +
+  geom_smooth(method = "lm")
+```
+
+Looks like using language tends to help, on the trials it's used on, and slightly on the trials it's not used on for BoS. Helps in some cases for PD. 
+
+Is there a dose-response relationship, or is one word enough?
+
+```{r}
+ggplot(game_chat |> filter(gametype == "BoS", words > 0), aes(x = log(words), y = mean_payout)) +
+  geom_point() +
+  facet_grid(gametype ~ cond) +
+  geom_smooth(method = "lm")
+
+ggplot(game_chat |> filter(gametype == "PD", words > 0), aes(x = log(words), y = mean_payout)) +
+  geom_point() +
+  facet_grid(gametype ~ cond) +
+  geom_smooth(method = "lm")
+```
+
+Especially where we have more data, looks like one word is enough. Indicative of coordination rather than negotiation, probably? 
+
+## Per game does talking help?
+
+One idea is that talking on some trials may set up coordination strategies that can then effectively be used on later trials without talking on those trials. 
+
+So we want to look at overall volume of talking (in words or in # of trial talked) as a predictor for performance, controlling for talk on that round? 
+
+```{r}
+group_talk <- game_chat |>
+  group_by(gameId) |>
+  summarize(total_words = sum(words), pct_chat = mean(is_chat))
+
+overall_talk <- game_chat |> left_join(group_talk)
+ggplot(overall_talk |> filter(gametype == "BoS", chat_cond == "chat"), aes(x = pct_chat, y = mean_payout, color = as.character(is_chat))) +
+  # stat_summary(fun.data="mean_cl_boot")+
+  # geom_point()+
+  facet_grid(gametype ~ cond) +
+  geom_smooth(method = "lm")
+
+ggplot(overall_talk |> filter(gametype == "PD", chat_cond == "chat"), aes(x = pct_chat, y = mean_payout, color = as.character(is_chat))) +
+  # stat_summary(fun.data="mean_cl_boot")+
+  # geom_point()+
+  facet_grid(gametype ~ cond) +
+  geom_smooth(method = "lm")
+```
+
+So, in mixed games, talking on more trials helps regardess of whether you talked on this particular trial. (Although overall talk might also be confounding with conscientiousness..., to fix you'd have to experimentally manipulate when chat is or isn't available)
+
+Talking more might help with hard PD, maybe in mixed?
+
+
+```{r}
+ggplot(overall_talk |> filter(gametype == "BoS", total_words > 0), aes(x = log(total_words), y = mean_payout, color = as.character(is_chat))) +
+  facet_grid(gametype ~ cond) +
+  geom_smooth(method = "lm")
+
+ggplot(overall_talk |> filter(gametype == "PD", total_words > 0), aes(x = log(total_words), y = mean_payout, color = as.character(is_chat))) +
+  facet_grid(gametype ~ cond) +
+  geom_smooth(method = "lm")
+```
+
+Here total words is going to mix how much you talk each time with how often you talk, so maybe this is just totally redundant with previous. More talk helps on BoS, even as transfer from other trials. PD seems messier? 
+
+
+# Are they human?
+
+```{r bot}
+exit_1 <- read_csv(here(study_1_loc, "exit.csv")) |>
+  group_by(game_cond, chat_cond, human) %>%
+  tally() %>%
+  pivot_wider(names_from = human, values_from = n) %>%
+  mutate(pct = yes / (no + yes)) |>
+  mutate(game = "one")
+
+exit_2 <- read_csv(here(study_2_loc, "exit.csv")) |>
+  group_by(game_cond, chat_cond, human) %>%
+  tally() %>%
+  pivot_wider(names_from = human, values_from = n) %>%
+  mutate(pct = yes / (no + yes)) |>
+  mutate(game = "two")
+
+exit_3 <- read_csv(here(study_3_loc, "exit.csv")) |>
+  group_by(game_cond, chat_cond, human) %>%
+  tally() %>%
+  pivot_wider(names_from = human, values_from = n) %>%
+  mutate(pct = yes / (no + yes)) |>
+  mutate(game = "three", game_cond = "spike_mix")
+
+
+exit <- exit_1 |>
+  bind_rows(exit_2) |>
+  bind_rows(exit_3) |>
+  select(game, game_cond, chat_cond, pct)
+
+exit
+```
+
+Across games, mostly think they are playing with a human, higher in chat than no chat, but not hugely. 
+
+
+# Quadrant analysis per trial
+
+ - chat_0 is had access to chat and didn't use on that trial
+ - chat_1 is used chat on that trial
+ - nochat_0 did not have access to chat 
+ 
+
+
+```{r}
+outcome <- all_rounds %>%
+  select(gameId, repNum, response, chat_cond, gametype, cond, role) |>
+  pivot_wider(names_from = role, values_from = response) %>%
+  mutate(outcome = str_c(p1, p2)) %>%
+  left_join(game_chat)
+```
+
+## BoS
+
+In BoS: P1 prefers AA to BB, P2 prefers BB to AA. AB and BA are 0 for both. 
+
+```{r}
+outcome %>%
+  filter(gametype == "BoS") %>%
+  mutate(outcome_parity = ifelse(outcome %in% c("AA", "BB"), 1, 0)) %>%
+  ggplot(aes(x = str_c(chat_cond, "_", is_chat), y = outcome_parity)) +
+  facet_grid(. ~ cond) +
+  stat_summary(fun.data = "mean_cl_boot") +
+  geom_hline(aes(yintercept = .5)) +
+  labs(title = "BoS:fraction choosing good outcomes (AA or BB)", y = "Good outcome?")
+```
+
+Near chance if you can't talk, above chance if you could but don't,  far above chance if you do. 
+
+```{r}
+outcome %>%
+  filter(gametype == "BoS") %>%
+  mutate(outcome_parity = ifelse(outcome %in% c("AA", "BB"), 1, 0)) %>%
+  ggplot(aes(x = repNum, y = outcome_parity, color = cond)) +
+  facet_grid(~ str_c(chat_cond, "_", is_chat)) +
+  geom_smooth(method = "lm", se = F) +
+  geom_hline(aes(yintercept = .5)) +
+  labs(title = "BoS:fraction choosing good outcomes", y = "Good outcome?")
+```
+
+## PD
+
+Expts 1 and 2 are suspect, but on most trials will pattern with easy PD. 
+
+In easyPD: P1 prefers BA > AA > BB > AB and P2 prefers AB > AA > BB > BA. AA is welfare maximizing.
+
+In hardPD: P1 prefers BA > AA > BB > AB and P2 prefers AB > AA > BB > BA. BA and AB are welfare maximizing.
+
+
+```{r}
+outcome %>%
+  filter(gametype == "PD") %>%
+  mutate(outcome_parity = ifelse(outcome %in% c("AA"), 1, 0)) %>%
+  ggplot(aes(x = str_c(chat_cond, "_", is_chat), y = outcome_parity)) +
+  facet_grid(. ~ cond) +
+  stat_summary(fun.data = "mean_cl_boot") +
+  geom_hline(aes(yintercept = .5)) +
+  labs(title = "PD:fraction choosing AA outcome")
+
+outcome %>%
+  filter(gametype == "PD") %>%
+  mutate(outcome_parity = ifelse(outcome %in% c("AB", "BA"), 1, 0)) %>%
+  ggplot(aes(x = str_c(chat_cond, "_", is_chat), y = outcome_parity)) +
+  facet_grid(. ~ cond) +
+  stat_summary(fun.data = "mean_cl_boot") +
+  geom_hline(aes(yintercept = .5)) +
+  labs(title = "PD:fraction choosing AB or BA outcome")
+
+outcome %>%
+  filter(gametype == "PD") %>%
+  mutate(outcome_parity = ifelse(outcome %in% c("BB"), 1, 0)) %>%
+  ggplot(aes(x = str_c(chat_cond, "_", is_chat), y = outcome_parity)) +
+  facet_grid(. ~ cond) +
+  stat_summary(fun.data = "mean_cl_boot") +
+  geom_hline(aes(yintercept = .5)) +
+  labs(title = "PD:fraction choosing BB outcome")
+```
+
+Can get a reasonable option no matter what. If you talk, you can get the uneven, but welfare-maximizing in hard PD. 
+
+# Language 
+
+How much language? 
+
+Filter only for games that talked at least a little. 
+
+Second graph filters for *trials* that talked. 
+
+```{r}
+game_chat |>
+  group_by(gameId) |>
+  summarize(total_words = sum(words)) |>
+  filter(total_words != 0) |>
+  left_join(game_chat) |>
+  mutate(expt = str_sub(cond, -1)) |>
+  ggplot(aes(x = repNum, y = words)) +
+  geom_point() +
+  facet_wrap(~expt) +
+  geom_smooth()
+
+game_chat |>
+  group_by(gameId) |>
+  summarize(total_words = sum(words)) |>
+  filter(total_words != 0) |>
+  left_join(game_chat) |>
+  filter(words > 0) |>
+  mutate(expt = str_sub(cond, -1)) |>
+  ggplot(aes(x = repNum, y = words)) +
+  geom_point() +
+  facet_wrap(~expt) +
+  geom_smooth()
+```
+
+## how often do *both* people talk
+
+```{r}
+pair_chat <- all_chat %>%
+  filter(!is.na(targets)) %>%
+  select(-type) %>%
+  full_join(all_rounds) %>%
+  mutate(words = str_count(text, "\\W+") %|% int(0)) |>
+  group_by(gameId, playerId, gametype, cond, chat_cond, repNum) %>%
+  summarize(
+    words = sum(words),
+    is_chat = ifelse(words > 0, 1, 0)
+  ) |>
+  group_by(gameId, gametype, cond, chat_cond, repNum) |>
+  summarize(how_many_chat = sum(is_chat)) |>
+  group_by(gameId, gametype, cond, chat_cond) |>
+  summarize(pct_both = mean(how_many_chat == 2)) |>
+  filter(chat_cond == "chat")
+
+ggplot(pair_chat, aes(x = cond, y = pct_both)) +
+  geom_jitter(width = .2) +
+  facet_wrap(~gametype)
+```
+Even in games that talk, there aren't *that* many trials where both people talk? 
+
+Probably going to need to manually look at the language for negotiation v "choose red" "yup" etc. 
+
+# Models
+
+```{r}
+game_chat <- all_chat %>%
+  filter(!is.na(targets)) %>%
+  select(-type) %>%
+  full_join(all_rounds) %>%
+  mutate(words = str_count(text, "\\W+") %|% int(0)) |>
+  group_by(gameId, gametype, cond, chat_cond, repNum) %>%
+  summarize(
+    words = sum(words),
+    mean_payout = mean(payoff),
+    is_chat = ifelse(words > 0, 1, 0)
+  ) |>
+  filter(cond %in% c("mix_2", "mix_3", "easy_3"))
+
+never_chat <- game_chat |>
+  group_by(gameId, chat_cond) |>
+  summarize(words = sum(words)) |>
+  mutate(use_chat = ifelse(words > 0, 1, 0))
+
+for_mod <- all_rounds |>
+  filter(cond %in% c("mix_2", "mix_3", "easy_3")) |>
+  select(gameId, repNum, playerId, payoff, chat_cond, gametype) |>
+  left_join(game_chat) |>
+  left_join(never_chat) |>
+  mutate(
+    has_chat = ifelse(chat_cond == "chat", 1, 0),
+    is_BoS = ifelse(gametype == "BoS", 1, 0)
+  ) # recode with no-chat PD as baseline
+```
+
+## Condition assignment on performance
+
+```{r}
+perf_priors <- c(
+  set_prior("normal(5,2)", class = "Intercept"),
+  set_prior("normal(0, 2)", class = "b"),
+  set_prior("normal(0, 2)", class = "sd"),
+  set_prior("lkj(1)", class = "cor")
+)
+
+perf_mod <- brm(payoff ~ has_chat * is_BoS + repNum + 
+                  (is_BoS | gameId) + 
+                  (is_BoS | playerId),
+  data = for_mod,
+  prior = perf_priors,
+  control = list(adapt_delta = .95)
+)
+
+perf_mod_tot <- brm(payoff ~ (use_chat | has_chat) * is_BoS +
+                      repNum +
+                      (is_BoS | gameId) + 
+                      (is_BoS | playerId),
+  data = for_mod, 
+  prior = perf_priors,
+  control = list(adapt_delta = .95)
+)
+
+freq_tot <- lm(payoff ~ (use_chat | has_chat) * is_BoS +
+                      repNum , data=for_mod )
+```
+
+## Words over time 
+
+log(words) ~ game_type * trial_number
+
+```{r}
+for_log_words <- for_mod |> filter(words>0) |> mutate(log_words=log(words))
+
+lang_priors  <- c(set_prior("normal(5,5)", class = "Intercept"),
+  set_prior("normal(0, 5)", class = "b"),
+  set_prior("normal(0, 5)", class = "sd"),
+  set_prior("lkj(1)", class = "cor"))
+
+log_words_mod <- brm(log_words ~ is_BoS*repNum +
+                       (is_BoS*repNum|gameId),
+                     data=for_log_words,
+                     prior=lang_priors,
+                     control=list(adapt_delta=.95)
+                     )
+
+```
+
+## Words on outcome
+
+outcome ~ game_type * log(words)
+
+```{r}
+perf_word_mod <- brm(payoff ~ log_words * is_BoS + repNum + 
+                  (is_BoS | gameId) + 
+                  (is_BoS | playerId),
+  data = for_log_words,
+  prior = perf_priors,
+  control = list(adapt_delta = .95)
+)
+
+```
+
+
+outcome ~ log(words_first_10)*game_type*words_now ? 
+
+```{r}
+early_words <- for_mod |> filter(repNum<10) |> group_by(gameId) |> summarize(early_words=sum(words))
+
+for_early_word_mod <- for_mod |> filter(repNum>9) |> left_join(early_words) |> filter(early_words>0) |> mutate(log_early_words=log(early_words))
+
+early_word_mod <- brm(payoff ~ log_early_words * is_BoS + is_chat*is_BoS+ repNum + 
+                  (is_BoS | gameId) + 
+                  (is_BoS | playerId),
+  data = for_early_word_mod,
+  prior = perf_priors,
+  control = list(adapt_delta = .95)
+)
+
+```
