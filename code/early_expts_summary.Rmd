@@ -555,6 +555,12 @@ perf_word_mod <- brm(payoff ~ log_words * is_BoS + repNum +
 ```
 
 
+```{r}
+
+ggplot(for_log_words, aes(x=log_words, y=payoff, color=repNum))+geom_jitter(alpha=.5)+geom_smooth(method="lm")+facet_wrap(is_BoS~cond)
+```
+
+TODO think more about!!
 outcome ~ log(words_first_10)*game_type*words_now ? 
 
 ```{r}
@@ -562,7 +568,7 @@ early_words <- for_mod |> filter(repNum<10) |> group_by(gameId) |> summarize(ear
 
 for_early_word_mod <- for_mod |> filter(repNum>9) |> left_join(early_words) |> filter(early_words>0) |> mutate(log_early_words=log(early_words))
 
-early_word_mod <- brm(payoff ~ log_early_words * is_BoS + is_chat*is_BoS+ repNum + 
+early_word_mod <- brm(payoff ~ log_early_words * is_BoS* is_chat+ repNum + 
                   (is_BoS | gameId) + 
                   (is_BoS | playerId),
   data = for_early_word_mod,
