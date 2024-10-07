@@ -49,6 +49,17 @@ export default class Turing extends React.Component {
               you will be playing together for the remainder of the game.
             </p>
             <div className="list">
+              <p>
+                We are aware that there are similar games where your partner is
+                a bot (or ChatGPT). <b> THIS IS NOT ONE OF THOSE.</b>
+                <p>
+                  {" "}
+                  We are cognitive scientists at a university, and our ethics
+                  approval (IRB) doesn't allow us to deceive participants.{" "}
+                </p>
+                You have been paired with another participant who was also
+                recruited from Prolific via the same task you were.
+              </p>
               <h3>
                 Not sure what to talk about? Here are some options to get you
                 started.
@@ -57,7 +68,6 @@ export default class Turing extends React.Component {
                 <li>What the weather's like where you are</li>
                 <li>Your favorite flavor of pie</li>
                 <li>An animal you think looks silly</li>
-                <li>A Prolific survey you did recently</li>
               </ul>{" "}
             </div>{" "}
           </h1>

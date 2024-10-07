@@ -13,7 +13,6 @@ export default class Consent extends React.Component {
               <img width="300px" src="/experiment/stanford.png" />
             </center>
           </div>
-          <br></br>
           <p>
             If you agree to take part in the research, you will play a series of
             games with other participants. This study will take approximately 15
@@ -43,14 +42,11 @@ export default class Consent extends React.Component {
     );
   }
 
-  renderNoFirefox = () => {
+  /*renderNoFirefox = () => {
     console.log("this is fire fox");
     return (
       <div className="consent">
-        <h1
-          className="bp3-heading"
-          style={{ textAlign: "center", color: "red" }}
-        >
+        <h1 className="bp3-heading" style={{ textAlign: "center", color: "red" }}>
           DO NOT USE FIREFOX!!
         </h1>
         <p style={{ textAlign: "center" }}>
@@ -59,15 +55,12 @@ export default class Consent extends React.Component {
         </p>
       </div>
     );
-  };
+  };*/
 
   render() {
     const browserHandler = {
       default: (browser) =>
-        browser === "firefox"
-          ? //this.renderNoFirefox()
-            Consent.renderConsent()
-          : Consent.renderConsent(),
+        /*browser === "firefox" ? this.renderNoFirefox() : */ Consent.renderConsent(),
     };
 
     return (

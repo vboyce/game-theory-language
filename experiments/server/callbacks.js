@@ -83,36 +83,10 @@ Empirica.onStageEnd((game, round, stage) => {
       p1.set("scoreIncrement", payout.p1);
       p2.set("scoreIncrement", payout.p2);
       //Save outcomes as property of round for later export/analysis
-      const bonus_trials = [7, 15, 32, 38];
-      //const bonus_trials = [0, 1, 2, 3];
-      if (bonus_trials.includes(round.get("repNum"))) {
-        console.log(round.get("repNum"));
-        let bonus_p1 = {
-          rep: round.get("repNum"),
-          own: payout.p1,
-          partner: payout.p2,
-        };
-        let bonus_p2 = {
-          rep: round.get("repNum"),
-          own: payout.p2,
-          partner: payout.p1,
-        };
-        let p2_old_bonus = p2.get("bonus_log");
-        let p1_old_bonus = p1.get("bonus_log");
-        p2_old_bonus.push(bonus_p2);
-        p1_old_bonus.push(bonus_p1);
-        p2.set("bonus_log", p2_old_bonus);
-        p1.set("bonus_log", p1_old_bonus);
-        players.forEach((player) => {
-          const currScore = player.get("bonus");
-          const scoreIncrement = player.get("scoreIncrement");
-          player.set("bonus", scoreIncrement * 0.1 + currScore);
-        });
-      }
       players.forEach((player) => {
-        //const currScore=player.get("bonus")
+        const currScore = player.get("bonus");
         const scoreIncrement = player.get("scoreIncrement");
-        //player.set("bonus", scoreIncrement*.01*scale + currScore);
+        player.set("bonus", scoreIncrement * 0.01 * scale + currScore);
         round.set("player_" + player._id + "_response", player.get("clicked"));
         round.set(
           "player_" + player._id + "_time",
