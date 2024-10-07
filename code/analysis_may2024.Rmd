@@ -5,6 +5,30 @@ output:
     toc: true
 ---
 
+# Summary
+
+* 32 games each condition (chat, no-chat)
+* humanness ratings are okay (75-77% -- in the acceptable range, probably lower than ideal)
+* seeing very little effect of chat, probably because people don't use the chat very much (and group to group variation) 
+* unlike prior pilots, not seeing an effect of chatted other times but not this one
+  * could be chance / slightly different participant populations
+  * could be different strategy space -- we did take away the points-counter which may make it harder to use that as an agreement point
+  * could be this task is too easy
+* about half of all utterances contain a color word 
+* strategy wise, a lot of talk about fairness, also some about having an idea of a strategy but partner not getting it 
+
+so...what now:
+* could give up on this project 
+* one big issue for both design and interpretation is that people's incentives are hard to control or predict and aren't the numbers we put out (strong values of fairness, for instance)
+  * the idea was to try to leverage game theory predictions, but people don't act like game
+  theory agents / the payoffs that a person is choosing over aren't what we're displaying
+  * possibly other areas of game theory would be better? 
+* could force chat usage (someone must send message before selection can occur -- heavy handed, but could get us ceiling) 
+* could up the difficulty -- more game types mixed together
+* could switch back to offering running total of reward
+
+  
+
 ```{r set-up, include=F}
 knitr::opts_chunk$set(echo = FALSE, warning = F, message = F)
 knitr::opts_chunk$set(dev = "png", dev.args = list(type = "cairo-png"), fig.width=7, fig.height=3)
@@ -39,6 +63,8 @@ model_location <- "code/models"
 ```
 
 ```{r bonus}
+
+
 ## This is for determining participant bonuses using the version of data with PID
 
 # d.players <- read_csv(here(data_location, 'players.csv')) %>%
@@ -50,7 +76,7 @@ model_location <- "code/models"
 #   write_csv(here(data_location, "player_payments.csv")) %>% select(id,bonus) %>%
 #   filter(bonus>0) %>% write_csv(here(data_location,"for_prolific.csv"))
 # #
-# cost <- read_csv(here(data_location, "player_payments.csv"))
+#cost <- read_csv(here("player_payments.csv")) |> select(id, bonus) |> filter(bonus>0) |> write_csv(here("for_prolific.csv"))
 # #
 # sum(cost$cost)
 ```
@@ -549,10 +575,42 @@ summary(perf_word_mod)
 
 Again, big group level variation. 
 
+# What people say strategy is
 
-# TODOs
+```{r}
+exit <- read_csv(here(data_location, "exit.csv")) |> select(chat_cond, strategy) |> filter(!is.na(strategy))
+
+message("chat")
+kable(exit |> filter(chat_cond=="chat") |> select(-chat_cond))
 
 
-* Look at the actual language
+message("no-chat")
+kable(exit |> filter(chat_cond=="no_chat") |> select(-chat_cond))
 
-* Look at what people said their strategies were
+
+```
+
+# In game talk
+
+note that there's some non-game-relevant chit-chat that hasn't been cleaned up!
+
+```{r}
+color_words <- c("red","blue", "purple", "green","yellow", "brown", "pink", "violet","cyan", "grey", "peach", "purplish", "beige", "orange")
+agreement_words <- c("okay", "ok", "yes", "sure")
+color_regex <- str_c(color_words, collapse="|")
+agreement_regex <- str_c(agreement_words, collapse="|")
+
+in_game_said <- chat %>%
+  filter(!is.na(targets)) %>%
+  select(-type) %>%
+  full_join(rounds) |> filter(!is.na(text)) |>  mutate(gameId=str_sub(gameId, 1,3), playerId=str_sub(playerId, 1,3)) |> select(gameId, playerId, repNum, gametype, text) |> 
+  mutate(has_color=str_detect(str_to_lower(text), color_regex),
+         has_agree=str_detect(str_to_lower(text), agreement_regex))
+
+in_game_said |> group_by(has_color) |> tally()
+in_game_said |> group_by(has_agree) |> tally()
+
+
+kable(in_game_said |> select(-has_color, -has_agree))
+```
+

@@ -192,6 +192,24 @@ ggplot(when_chat, aes(x = repNum, y = pct_chat, color = cond)) +
   geom_smooth(se = F, method = "lm") +
   labs(y = "pct of games who said anything each round")
 ```
+```{r}
+
+ggplot(when_chat |> filter(cond %in%c("mix_2", "mix_3", "easy_3")) |> mutate(condition=ifelse(str_detect(cond, "3"),3,2)), aes(x = repNum, y = pct_chat, color = gametype)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  coord_cartesian(ylim=c(0,1))+
+  labs(title = "pct of games who said anything each round")+facet_wrap(~condition)
+
+game_chat |> filter(chat_cond == "chat") |>filter(cond %in%c("mix_2", "mix_3", "easy_3")) |> 
+  mutate(is.chat = ifelse(words > 0, 1, 0)) %>%
+  group_by(gameId, gametype, cond) %>%
+  summarize(pct_chat = mean(is.chat)) |> 
+  mutate(condition=ifelse(str_detect(cond, "3"),3,2)) |> 
+  ggplot(aes(x=reorder(gameId, pct_chat, mean), y=pct_chat, color=gametype))+geom_point()+
+  theme(axis.text.x=element_blank())+
+    coord_cartesian(ylim=c(0,1))+facet_wrap(~condition)
+
+```
 
 In games where chat is an option, it still isn't used that much on a per trial basis. Mixing PD and BoS seems to have helped increase the talking overall. 
 
@@ -427,6 +445,7 @@ game_chat |>
   facet_wrap(~expt) +
   geom_smooth()
 ```
+
 
 ## how often do *both* people talk
 
