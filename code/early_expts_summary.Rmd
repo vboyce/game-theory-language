@@ -192,6 +192,19 @@ ggplot(when_chat, aes(x = repNum, y = pct_chat, color = cond)) +
   geom_smooth(se = F, method = "lm") +
   labs(y = "pct of games who said anything each round")
 ```
+
+```{r}
+game_chat |> filter(chat_cond == "chat") |>
+  mutate(is.chat = ifelse(words > 0, 1, 0)) %>%
+  mutate(game_no=str_sub(cond, -1)) |> 
+  group_by(gameId, game_no) %>%
+  summarize(pct_chat = mean(is.chat)) |> 
+  arrange(game_no, pct_chat) |> 
+  group_by(game_no) |> 
+  mutate(x=1/n()*row_number()) |> ggplot(aes(x=x, y=pct_chat))+geom_point()+facet_wrap(~game_no)+
+    coord_cartesian(ylim=c(0,1))+geom_hline(yintercept=.1)+geom_hline(yintercept=.5)
+
+```
 ```{r}
 
 ggplot(when_chat |> filter(cond %in%c("mix_2", "mix_3", "easy_3")) |> mutate(condition=ifelse(str_detect(cond, "3"),3,2)), aes(x = repNum, y = pct_chat, color = gametype)) +
