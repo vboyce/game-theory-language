@@ -536,6 +536,147 @@ ggplot(pair_chat, aes(x = gametype, y = value, color=name, group=name)) +
 
 Even in games that talk, there aren't *that* many trials where both people talk? 
 
+
+# Subgroup analysis
+
+As an exploratory thing, what if we look at the people who talked *a lot* or *a moderate amount* 
+
+high = 40%+ of trials (10 games)
+
+med = 10% - 39% of trials (10 games)
+
+minimal = < 10% of trials (33 games)
+
+no = couldn't chat (53 games)
+
+
+```{r}
+
+how_many_chat <- game_chat |> filter(chat_cond == "chat") |>
+  mutate(is.chat = ifelse(words > 0, 1, 0)) %>%
+  group_by(gameId) %>%
+  summarize(pct_chat = mean(is.chat)) |> 
+  arrange(pct_chat)
+
+chat_subgroup <- how_many_chat |> mutate(chat_subgroup=case_when(
+  pct_chat>.4 ~ "high",
+  pct_chat>.09 ~ "med",
+  T ~ "min"
+))
+
+subgroup_rounds <- rounds |> left_join(chat_subgroup) |>
+  mutate(chat_subgroup=ifelse(is.na(chat_subgroup), "no", chat_subgroup))
+
+subgroup_game_chat <- game_chat |> left_join(chat_subgroup) |>
+  mutate(chat_subgroup=ifelse(is.na(chat_subgroup), "no", chat_subgroup))
+```
+
+```{r}
+bonuses <- subgroup_rounds %>%
+  group_by(playerId, gameId, chat_subgroup, gametype) %>%
+  summarize(payoff = mean(payoff))
+
+
+
+ggplot(bonuses, aes(x = chat_subgroup, y = payoff, color = str_c(chat_subgroup))) +
+  geom_jitter(width = .1, alpha = .1) +
+  facet_grid(. ~ gametype) +
+  scale_color_viridis(discrete = T) +
+  labs(y = "mean_reward", x = "chat usage") +
+  stat_summary(fun.data = "mean_cl_boot", position = position_dodge(width = .3), size = .7, color = "black", geom="errorbar") +
+    stat_summary(fun.data = "mean_cl_boot", position = position_dodge(width = .3), size = .7, color = "black") +
+  theme(legend.position = "none") +
+  coord_cartesian(ylim = c(0, 20)) +
+  labs(y = "Mean reward / trial") +
+  theme(
+    axis.text = element_text(size = 12),
+    axis.title = element_text(size = 14),
+    strip.text = element_text(size = 14)
+  )
+
+```
+
+
+```{r}
+ggplot(subgroup_game_chat, aes(x = str_c(chat_subgroup, "_", is_chat), y = mean_payout)) +
+    geom_jitter(aes(color=chat_subgroup), alpha=.2)+
+
+  stat_summary(fun.data = "mean_cl_boot", geom="errorbar") +
+    stat_summary(fun.data = "mean_cl_boot") +
+
+facet_wrap(~gametype) +
+  geom_smooth(method = "lm")+
+  theme(legend.position = "none")
+```
+
+## Option
+
+```{r}
+subgroup_outcome <- subgroup_rounds %>%
+  select(gameId, repNum, response, chat_subgroup, gametype, role) |>
+  pivot_wider(names_from = role, values_from = response) %>%
+  mutate(outcome = str_c(p1, p2)) %>%
+  left_join(game_chat)
+```
+
+### BoS
+```{r}
+subgroup_outcome %>%
+  filter(gametype == "BoS") %>%
+  mutate(outcome_parity = ifelse(outcome %in% c("AA", "BB"), 1, 0)) %>%
+  ggplot(aes(x = str_c(chat_subgroup, "_", is_chat), y = outcome_parity, color=chat_subgroup)) +
+  stat_summary(fun.data = "mean_cl_boot") +
+  geom_hline(aes(yintercept = .5)) +
+  labs(title = "BoS:fraction choosing good outcomes (AA or BB)", y = "Good outcome?")
+```
+
+### Spike BoS
+
+```{r}
+subgroup_outcome %>%
+  filter(gametype == "spikeBoS") %>%
+  mutate(outcome_parity = ifelse(outcome %in% c("AA", "BB"), 1, 0)) %>%
+  ggplot(aes(x = str_c(chat_subgroup, "_", is_chat), y = outcome_parity, color=chat_subgroup)) +
+  stat_summary(fun.data = "mean_cl_boot") +
+  geom_hline(aes(yintercept = .5)) +
+  labs(title = "Spiked BoS:fraction choosing good outcomes (AA or BB)", y = "Good outcome?")
+
+```
+
+### easy PD
+
+In easyPD: P1 prefers BA > AA > BB > AB and P2 prefers AB > AA > BB > BA. AA is welfare maximizing.
+
+```{r}
+subgroup_outcome %>%
+  filter(gametype == "easyPD") %>%
+  mutate(AA = ifelse(outcome %in% c("AA"), 1, 0), 
+         AB.BA =ifelse(outcome %in% c("AB", "BA"), 1, 0), 
+         BB = ifelse(outcome %in% c("BB"), 1, 0)) %>%
+  pivot_longer(AA:BB, names_to="type", values_to="selected") |> 
+  ggplot(aes(x = str_c(chat_subgroup, "_", is_chat), y = selected, color=type)) +
+  stat_summary(fun.data = "mean_cl_boot") +
+  geom_hline(aes(yintercept = .5)) 
+```
+
+### hard PD
+
+In hard PD: P1 prefers BA > AA > BB > AB and P2 prefers AB > AA > BB > BA. AB/BA is welfare maximizing.
+
+
+```{r}
+subgroup_outcome %>%
+  filter(gametype == "hardPD") %>%
+  mutate(AA = ifelse(outcome %in% c("AA"), 1, 0), 
+         AB.BA =ifelse(outcome %in% c("AB", "BA"), 1, 0), 
+         BB = ifelse(outcome %in% c("BB"), 1, 0)) %>%
+  pivot_longer(AA:BB, names_to="type", values_to="selected") |> 
+  ggplot(aes(x = str_c(chat_subgroup, "_", is_chat), y = selected, color=type)) +
+  stat_summary(fun.data = "mean_cl_boot") +
+  geom_hline(aes(yintercept = .5)) 
+```
+So if you do use the chat, you tend to get the best option. (Using chat means that easy and hard PD look different)
+
 <!--
 # Models
 
