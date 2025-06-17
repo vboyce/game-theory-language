@@ -1,0 +1,82 @@
+\documentclass{article}
+\usepackage{multirow,array}
+\usepackage[]{subcaption}
+\begin{document}
+	\begin{figure}
+		\caption{Reward structure for each game. In each cell, the reward for X is shown before the reward for Y. }
+		\label{payoff-matrix}
+		\setlength{\extrarowheight}{2pt}
+		\begin{subfigure}[b]{0.45\textwidth}
+			\caption{PD generalized -- Each player prefers B to A, but players prefer AA to BB. }
+			\label{payoff-PD}
+		\begin{tabular}{cc|c|c|}
+			& \multicolumn{1}{c}{} & \multicolumn{2}{c}{Player $Y$}\\
+			& \multicolumn{1}{c}{} & \multicolumn{1}{c}{$A$}  & \multicolumn{1}{c}{$B$} \\\cline{3-4}
+			\multirow{2}*{Player $X$}  & $A$ & $(2,2)$ & $(0,3)$ \\\cline{3-4}
+			& $B$ & $(3,0)$ & $(1,1)$ \\\cline{3-4}
+		\end{tabular}
+		\end{subfigure}
+		~~~~
+			\begin{subfigure}[b]{0.45\textwidth}
+			\caption{BoS generalized-- X prefers AA and Y prefers BB, but both prefer either to AB or BA.}
+			\label{payoff-BoS}
+			\begin{tabular}{cc|c|c|}
+				& \multicolumn{1}{c}{} & \multicolumn{2}{c}{Player $Y$}\\
+				& \multicolumn{1}{c}{} & \multicolumn{1}{c}{$A$}  & \multicolumn{1}{c}{$B$} \\\cline{3-4}
+				\multirow{2}*{Player $X$}  & $A$ & $(2,1)$ & $(0,0)$ \\\cline{3-4}
+				& $B$ & $(0,0)$ & $(1,2)$ \\\cline{3-4}
+			\end{tabular}
+		\end{subfigure}
+		\bigskip
+		
+		\bigskip
+								\begin{subfigure}[b]{0.45\textwidth}
+			\caption{Example PD easy: Here the total reward from AA is greater that the total reward from AB or BA.}
+			\label{payoff-PDeasy}
+			\begin{tabular}{cc|c|c|}
+				& \multicolumn{1}{c}{} & \multicolumn{2}{c}{Player $Y$}\\
+				& \multicolumn{1}{c}{} & \multicolumn{1}{c}{$A$}  & \multicolumn{1}{c}{$B$} \\\cline{3-4}
+				\multirow{2}*{Player $X$}  & $A$ & $(5,5)$ & $(0,7)$ \\\cline{3-4}
+				& $B$ & $(7,0)$ & $(2,2)$ \\\cline{3-4}
+			\end{tabular}
+		\end{subfigure}
+		~~~~
+		\begin{subfigure}[b]{0.45\textwidth}
+			\caption{Example BoS normal: The scale of the two rewards is relatively similar. }
+			\label{payoff-BoSnormal}
+			\begin{tabular}{cc|c|c|}
+				& \multicolumn{1}{c}{} & \multicolumn{2}{c}{Player $Y$}\\
+				& \multicolumn{1}{c}{} & \multicolumn{1}{c}{$A$}  & \multicolumn{1}{c}{$B$} \\\cline{3-4}
+				\multirow{2}*{Player $X$}  & $A$ & $(6, 2)$ & $(0,0)$ \\\cline{3-4}
+				& $B$ & $(0,0)$ & $(2,6)$ \\\cline{3-4}
+			\end{tabular}
+		\end{subfigure}
+		
+		\bigskip
+		\bigskip
+			\begin{subfigure}[b]{0.45\textwidth}
+			\caption{Example PD hard: Here the total reward from AB or BA is greater than AA because the highest reward is more than double the second highest.}
+			\label{payoff-PDhard}
+			\begin{tabular}{cc|c|c|}
+				& \multicolumn{1}{c}{} & \multicolumn{2}{c}{Player $Y$}\\
+				& \multicolumn{1}{c}{} & \multicolumn{1}{c}{$A$}  & \multicolumn{1}{c}{$B$} \\\cline{3-4}
+				\multirow{2}*{Player $X$}  & $A$ & $(4,4)$ & $(0,11)$ \\\cline{3-4}
+				& $B$ & $(11,0)$ & $(2,2)$ \\\cline{3-4}
+			\end{tabular}
+		\end{subfigure}
+		~~~~
+				\begin{subfigure}[b]{0.45\textwidth}
+			\caption{Example BoS spike: One of the rewards is much higher than the other, raising the stakes of which of AA or BB to aim for. }
+			\label{payoff-BoSspike}
+			\begin{tabular}{cc|c|c|}
+				& \multicolumn{1}{c}{} & \multicolumn{2}{c}{Player $Y$}\\
+				& \multicolumn{1}{c}{} & \multicolumn{1}{c}{$A$}  & \multicolumn{1}{c}{$B$} \\\cline{3-4}
+				\multirow{2}*{Player $X$}  & $A$ & $(28,5)$ & $(0,0)$ \\\cline{3-4}
+				& $B$ & $(0,0)$ & $(5,28)$ \\\cline{3-4}
+			\end{tabular}
+		\end{subfigure}
+		
+		\end{figure}
+		
+							
+\end{document}
