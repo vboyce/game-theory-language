@@ -18,6 +18,18 @@ biblio-style: unsrt
 output: 
   rticles::arxiv_article:
     extra_dependencies: ["float"]
+header-includes:
+ - \usepackage{float}
+ - \usepackage{setspace}\singlespacing
+ - \renewcommand{\textfraction}{0.00}
+ - \renewcommand{\topfraction}{1}
+ - \renewcommand{\bottomfraction}{1}
+ - \renewcommand{\floatpagefraction}{1}
+ - \setcounter{topnumber}{5}
+ - \setcounter{bottomnumber}{5}
+ - \setcounter{totalnumber}{6}  
+ - \usepackage{caption, subcaption}
+ - \usepackage{placeins}
 
 ---
 
@@ -213,10 +225,10 @@ For the most part, we succeeded in convincing players their partner was indeed h
 
 Our other manipulation check was how well participants took up the manipulation of being able to use a chat to communicate with their partner. 
 
-As shown in Figure TODO, groups vary substantially in how many trials they use the chat on, but many groups rarely use the chat. The horizontal lines correspond to 10% and 50% of the time, so games lower than the 10% line are using chat on fewer than 4 (out of 40) trials. There's a lot of not chatting in the access-to-chat condition.  
+As shown in Figure  \ref{chat-pct}, groups vary substantially in how many trials they use the chat on, but many groups rarely use the chat. The horizontal lines correspond to 10% and 50% of the time, so games lower than the 10% line are using chat on fewer than 4 (out of 40) trials. There's a lot of not chatting in the access-to-chat condition.  
 
 
-```{r chat-pct, fig.width=10, fig.height=3, }
+```{r chat-pct, fig.width=10, fig.height=3, fig.cap="In chat conditions, how many trials each game choose to use the chat at all. Within each experiment, games are arranged in frequency of chat use. Horizontal lines denote 10% and 50% use of chat. \\label{chat-pct}"}
 
 game_chat <- all_chat %>%
   filter(!is.na(targets)) %>%
@@ -240,14 +252,37 @@ game_chat |>
   mutate(x = 1 / n() * row_number()) |>
   ggplot(aes(x = x, y = pct_chat)) +
   geom_point() +
-  facet_grid(.~expt) +
-  coord_cartesian(ylim = c(-.05, 1.05),xlim=c(-.05, 1.05), expand=F) +
+  facet_grid(.~expt) + 
   geom_hline(yintercept = .1) +
   geom_hline(yintercept = .5) +
-  labs(x="Fraction games", y="Fraction trials with chat messages")
+  labs(x="Fraction games", y="Fraction trials with chat messages")+
+    scale_x_continuous(breaks=c(0, .25, .5, .75, 1), labels=c("0", ".25", ".5", ".75", "1"))+
+      scale_y_continuous(breaks=c(0, .25, .5, .75, 1), labels=c("0", ".25", ".5", ".75", "1"))
 ```
 
 ## Main results
+
+
+```{r}
+msum_loc="manuscript/model_files/summary"
+
+payout_mega <- read_rds(here(msum_loc, "payout_mega.rds"))
+                        
+payout_combo <- read_rds(here(msum_loc,"payout_mega_combo.rds"))
+payout_3 <- read_rds(here(msum_loc, "payout_combo_3.rds"))
+payout_4 <- read_rds(here(msum_loc, "payout_combo_4.rds"))
+payout_5 <- read_rds(here(msum_loc, "payout_combo_5.rds"))
+
+# 
+bos_aligned <- read_rds(here(msum_loc, "BoS_aligned_mega.rds"))
+bos_3 <- read_rds(here(msum_loc, "BoS_aligned_3.rds"))
+bos_4 <- read_rds(here(msum_loc, "BoS_aligned_4.rds"))
+bos_5 <- read_rds(here(msum_loc, "BoS_aligned_5.rds"))
+
+PD_cooperate <- read_rds(here(msum_loc, "PD_cooperate_mega.rds"))
+PD_unneven <- read_rds(here(msum_loc, "PD_unneven_mega.rds"))
+
+```
 
 The prediction is that having access to the communication modality will be helpful for aligning coordination in BoS where both players want to choose the same thing. 
 
@@ -257,42 +292,43 @@ After observing that occasionally there were PD trials were the welfare-maximizi
 
 In contrast, we refer to the trials in which only one option is welfare maximizing as "easy PD" where we do not expect language to help. 
 
-The first way we assess whether access to chat makes a difference on game performance is to look at the mean number of points recieved per trial. Because BoS and PD have different point structures, we compare within game type. 
+The first way we assess whether access to chat makes a difference on game performance is to look at the mean number of points received per trial. Because BoS and PD have different point structures, we compare within game type. 
 
-```{r points_pd, fig.cap="TODO fig cap"}
+
+```{r points, fig.cap="Rewards achieved per trial depending on experiment, game condition, and chat condition. \\label{points}"}
+
+pal = c("PD_easy"="#1B9E77FF","PD_normal"= "#D95F02FF", "PD_hard"="#7570B3FF", "BoS_normal"= "#E7298AFF", "BoS_spike"="#66A61EFF")
 bonuses <- all_rounds %>%
   group_by(playerId, gameId, chat_cond, cond, gametype, expt) %>%
-  summarize(payoff = mean(payoff))
+  summarize(payoff = mean(payoff)) |> 
+  mutate( combo_type=str_c(gametype, "_", cond) |> factor(levels=c("PD_easy", "PD_normal", "PD_hard", "BoS_normal", "BoS_spike")))
 
 
 
-ggplot(bonuses, aes(x = chat_cond, y = payoff, color = str_c(cond, "_", gametype), group = cond)) +
+ggplot(bonuses, aes(x = chat_cond, y = payoff, color = combo_type, group = cond)) +
   geom_point(position = position_jitterdodge(jitter.width = .1, dodge.width = .7), alpha = .3) +
   facet_grid(gametype~expt) +
-  scale_color_brewer(palette = "Dark2") +
+  scale_color_manual(values=pal) +
   labs(y = "mean_reward", x = "condition") +
-  stat_summary(fun.data = "mean_cl_boot", position = position_dodge(width = .7), size = .7, color = "black") +
+  stat_summary(fun.data = "mean_cl_boot", position = position_dodge(width = .7), size = .3, color = "black") +
     stat_summary(fun.data = "mean_cl_boot", position = position_dodge(width = .7), size = .7, color = "black", geom="line") +
-
+guides(color = guide_legend(override.aes = list(alpha = 1, size=3)))+
   theme(legend.position = "bottom") +
   coord_cartesian(ylim = c(0, 20)) +
   labs(y = "Mean reward / trial", ) +
   theme(
     legend.title=element_blank(),
-    axis.title.x=element_blank(),
-    axis.text = element_text(size = 12),
-    axis.title = element_text(size = 14),
-    strip.text = element_text(size = 14)
+    axis.title.x=element_blank()
   )
 ```
 
-TODO set per-condition color scheme!
+In a model of payouts by coarse conditions (BoS v PD), there is an interaction between condition and chat condition where chat condition leads to higher payout for BoS (`r stats_text(payout_mega, 4)`). Using finer grained measures of condition, and treating "easy PD" as baseline, there are interactions between chat and both normal BoS (`r stats_text(payout_combo, 7)`) and spike BoS (`r stats_text(payout_combo, 8)`). The same directionality occurs in individual experiments, but with wide credible intervals. In Experiment 3, the chat interaction with normal BoS is `r stats(payout_3, 6)` and with spike BoS is `r stats(payout_3, 7)`. In Experiment 4, the interaction between chat and normal BoS is `r stats(payout_4, 4)`. In Experiment 5, the chat interaction with normal BoS is `r stats(payout_5, 6)` and with spike BoS is `r stats(payout_5, 7)`. Full model results are in the Appendix. 
+
 
 In BoS, there is a generally a slightly higher score in the chat condition than the nochat condition, whereas there is not a difference between condtions in PD. 
 
 Looking at points introduces some noise as the points were varying even within a type of game. To understand more what is being selected, we can look at what quadrant games are ending up in.
 
-TODO include topline model results
 
 ### Quadrant analysis per trial
 
@@ -301,20 +337,23 @@ outcome <- all_rounds %>%
   select(gameId, repNum, response, chat_cond, gametype, cond, role) |>
   pivot_wider(names_from = role, values_from = response) %>%
   mutate(outcome = str_c(p1, p2)) %>%
-  left_join(game_chat)
+  left_join(game_chat) |> 
+   mutate( combo_type=str_c(gametype, "_", cond) |> factor(levels=c("PD_easy", "PD_normal", "PD_hard", "BoS_normal", "BoS_spike")))
+
 ```
 
-For BoS, the desirable outcome is to both choose the same box. As can be seen in Figure TODO, this good outcome is achieved at above change levels when people can chat and usually at chance levels when people cannot. 
+For BoS, the desirable outcome is to both choose the same box. As can be seen in Figure \@ref(fig-bosquad), this good outcome is achieved at above change levels when people can chat and usually at chance levels when people cannot. Across experiments, the chat condition has a higher rate of good (aligned) outcomes (`r stats_text(bos_aligned, 3)`). The estimates are less certain for individual experiments. In experiment 3 the effect was `r stats_text(bos_3, 3)`; in experiment 4, `r stats_text(bos_4,2)`; and in experiment 5, `r stats_text(bos_5,3)`. 
 
-```{r, fig.cap="In BoS: P1 prefers AA to BB, P2 prefers BB to AA. AB and BA are 0 for both. "}
+```{r bosquad, fig.cap="For BoS trials, how frequently pairs made coordinated selections that recieved rewards. \\label{bosquad} ", fig.height=3, fig.width=8}
 outcome %>%
   filter(gametype == "BoS") %>%
   mutate(outcome_parity = ifelse(outcome %in% c("AA", "BB"), 1, 0)) %>%
-  ggplot(aes(x = str_c(chat_cond), y = outcome_parity, color=cond, group=cond)) +
+  ggplot(aes(x = str_c(chat_cond), y = outcome_parity, color=combo_type, group=combo_type)) +
   facet_grid(~ expt) +
+  scale_color_manual(values=pal)+
   stat_summary(fun.data = "mean_cl_boot", position=position_dodge(width=.3)) +
   geom_hline(aes(yintercept = .5)) +
-  labs(title = "BoS:fraction choosing good outcomes (AA or BB)", y = "Good outcome?")+
+  labs(y = "Good outcome?", x="Chat condition", color="")+
   theme(legend.position="bottom")
 ```
 We again note that the off-diagonal rewards were misdisplayed for one of the players in experiments 1 and 2 for PD. On most trials "normal_PD" will pattern with easy PD. 
@@ -324,287 +363,98 @@ In easyPD: P1 prefers BA > AA > BB > AB and P2 prefers AB > AA > BB > BA. AA is 
 In hardPD: P1 prefers BA > AA > BB > AB and P2 prefers AB > AA > BB > BA. BA and AB are welfare maximizing.
 
 
-```{r}
+```{r , fig.cap="For PD trials, how frequently pairs made selections that results in each type of outcome. AA is the cooperate outcome, AB/BA is mixed -- one cooperate, one defect, BB is both defect. \\label{pdquad} ", fig.height=5, fig.width=8}
 outcome %>%
   filter(gametype == "PD") %>%
   mutate(AA = ifelse(outcome %in% c("AA"), 1, 0)) %>%
   mutate(AB_BA= ifelse(outcome %in% c("AB", "BA"), 1, 0)) %>%
   mutate(BB = ifelse(outcome %in% c("BB"), 1, 0)) %>%
   pivot_longer(c("AA", "AB_BA", "BB"), names_to="outcome_type", values_to="selected") |> 
-  ggplot(aes(x = chat_cond, y = selected, color=cond)) +
+  ggplot(aes(x = chat_cond, y = selected, color=combo_type)) +
   facet_grid(outcome_type ~ expt) +
+    scale_color_manual(values=pal)+
+
   stat_summary(fun.data = "mean_cl_boot", position=position_dodge(width=.3)) +
   geom_hline(aes(yintercept = .5)) +
+  labs(y="fraction selected", x="Chat condition", color="")+
   theme(legend.position="bottom")
 ```
 From Figure TODO, we see that the preferred outcome is AA which is welfare-maximizing in easy PD. This is not what game theory predicts for rational actors, instead, participants are being nice and cooperative with each other. 
 
-There is a slight tendency for more AA selections in easy than hard PD, especially in the chat conditions, but slight. 
+Overall, for PD, the preference was to align on the fair-but-high square, regardless of whether chat was available. In the hard PD, AA selections were less common (`r stats_text(PD_cooperate, 2)`) and AA selections were slightly lowered still by a hard PD x chat interaction (`r stats_text(PD_cooperate, 5)`). The interaction effect had a credible interval overlapping 0 when experiments 3 or 5 were analyzed individually.  In parallel, there was a hard PD x chat interaction increasing the rate of AB/BA selections (`r stats_text(PD_unneven, 5)`), consistent with the idea that this is the best outcome for hard PD, but requires more complex coordination to achieve. 
 
+Overall, the results based on condition assignment are consistent with the prediction that language would be more beneficial for BoS than for PD. However, conditional differences are small and often noisy (presumably due to low update of using language), and so the experiments do not provide compelling evidence. 
 
-# Analyses based on use of chat 
+## Uptake results
 
-## Per game does talking help?
-
-One idea is that talking on some trials may set up coordination strategies that can then effectively be used on later trials without talking on those trials. 
-
-So we want to look at overall volume of talking (in words or in # of trial talked) as a predictor for performance, controlling for talk on that round? 
+To confirm that language use is, indeed useful, we also provide visualizations looking at both the option and choice to use language on a trial by trial basis. Note that a pairs' choice to use language is not assigned and thus this exploratory analysis could be confounded. 
 
 ```{r}
-group_talk <- game_chat |>
-  group_by(gameId) |>
-  summarize(total_words = sum(words), pct_chat = mean(is_chat))
-
-overall_talk <- game_chat |> left_join(group_talk)
-ggplot(overall_talk |> filter(gametype == "BoS", chat_cond == "chat"), aes(x = pct_chat, y = mean_payout, color = as.character(is_chat))) +
-  # stat_summary(fun.data="mean_cl_boot")+
-  # geom_point()+
-  facet_grid(gametype ~ cond) +
-  geom_smooth(method = "lm")
-
-ggplot(overall_talk |> filter(gametype == "PD", chat_cond == "chat"), aes(x = pct_chat, y = mean_payout, color = as.character(is_chat))) +
-  # stat_summary(fun.data="mean_cl_boot")+
-  # geom_point()+
-  facet_grid(gametype ~ cond) +
-  geom_smooth(method = "lm")
+outcome_chatted <- outcome |> 
+  mutate(chatted = case_when(
+    chat_cond =="nochat" ~ "nochat",
+    is_chat == 1 ~ "chatted",
+    is_chat == 0 ~ "quiet"
+  ) |> factor(levels=c("chatted", "quiet", "nochat")))
 ```
-
-So, in mixed games, talking on more trials helps regardess of whether you talked on this particular trial. (Although overall talk might also be confounding with conscientiousness..., to fix you'd have to experimentally manipulate when chat is or isn't available)
-
-Talking more might help with hard PD, maybe in mixed?
-
-
-```{r}
-ggplot(overall_talk |> filter(gametype == "BoS", total_words > 0), aes(x = log(total_words), y = mean_payout, color = as.character(is_chat))) +
-  facet_grid(gametype ~ cond) +
-  geom_smooth(method = "lm")
-
-ggplot(overall_talk |> filter(gametype == "PD", total_words > 0), aes(x = log(total_words), y = mean_payout, color = as.character(is_chat))) +
-  facet_grid(gametype ~ cond) +
-  geom_smooth(method = "lm")
-```
-
-Here total words is going to mix how much you talk each time with how often you talk, so maybe this is just totally redundant with previous. More talk helps on BoS, even as transfer from other trials. PD seems messier? 
-
-
-
-
-
-
-## Quadrant analysis per trial
-
- - chat_0 is had access to chat and didn't use on that trial
- - chat_1 is used chat on that trial
- - nochat_0 did not have access to chat 
- 
-
-
-```{r}
-outcome <- all_rounds %>%
-  select(gameId, repNum, response, chat_cond, gametype, cond, role) |>
-  pivot_wider(names_from = role, values_from = response) %>%
-  mutate(outcome = str_c(p1, p2)) %>%
-  left_join(game_chat)
-```
-
-## BoS
 
 In BoS: P1 prefers AA to BB, P2 prefers BB to AA. AB and BA are 0 for both. 
 
-```{r}
-outcome %>%
+```{r, fig.cap="For BoS trials, how frequently pairs made coordinated selections that recieved rewards as a function of whether chat was available or used that trial. \\label{bosquad-uptake} ", fig.height=3, fig.width=8}
+outcome_chatted %>%
   filter(gametype == "BoS") %>%
   mutate(outcome_parity = ifelse(outcome %in% c("AA", "BB"), 1, 0)) %>%
-  ggplot(aes(x = str_c(chat_cond, "_", is_chat), y = outcome_parity)) +
-  facet_grid(. ~ cond) +
-  stat_summary(fun.data = "mean_cl_boot") +
+  ggplot(aes(x = chatted, y = outcome_parity, color=combo_type, group=combo_type)) +
+  facet_grid(~ expt) +
+  scale_color_manual(values=pal)+
+  stat_summary(fun.data = "mean_cl_boot", position=position_dodge(width=.3)) +
   geom_hline(aes(yintercept = .5)) +
-  labs(title = "BoS:fraction choosing good outcomes (AA or BB)", y = "Good outcome?")
+  labs(y = "Good outcome?", x="Chat usage", color="")+
+  theme(legend.position="bottom")
 ```
 
-Near chance if you can't talk, above chance if you could but don't,  far above chance if you do. 
+Near chance if you can't talk, above chance if you could but don't, far above chance if you do. This pattern suggests that some of the benefits to chatting spill over onto other trials, perhaps via setting up conventions for determining what strategy to use to break the symmetry. 
 
-```{r}
-outcome %>%
-  filter(gametype == "BoS") %>%
-  mutate(outcome_parity = ifelse(outcome %in% c("AA", "BB"), 1, 0)) %>%
-  ggplot(aes(x = repNum, y = outcome_parity, color = cond)) +
-  facet_grid(~ str_c(chat_cond, "_", is_chat)) +
-  geom_smooth(method = "lm", se = F) +
+```{r, fig.cap="For PD trials, how frequently pairs made selections that results in each type of outcome as a function of chat availability and usage on each trial. AA is the cooperate outcome, AB/BA is mixed -- one cooperate, one defect, BB is both defect. \\label{pdquad} ", fig.height=5, fig.width=8}
+outcome_chatted %>%
+  filter(gametype == "PD") %>%
+  mutate(AA = ifelse(outcome %in% c("AA"), 1, 0)) %>%
+  mutate(AB_BA= ifelse(outcome %in% c("AB", "BA"), 1, 0)) %>%
+  mutate(BB = ifelse(outcome %in% c("BB"), 1, 0)) %>%
+  pivot_longer(c("AA", "AB_BA", "BB"), names_to="outcome_type", values_to="selected") |> 
+  ggplot(aes(x = chatted, y = selected, color=combo_type)) +
+  facet_grid(outcome_type ~ expt) +
+    scale_color_manual(values=pal)+
+
+  stat_summary(fun.data = "mean_cl_boot", position=position_dodge(width=.3)) +
   geom_hline(aes(yintercept = .5)) +
-  labs(title = "BoS:fraction choosing good outcomes", y = "Good outcome?")
+  theme(legend.position="bottom")
 ```
+Noteably, the selection of AB/BA options in hard PD is primarly being driven by trials where people did communicate with each other. 
 
-## PD
-
-Expts 1 and 2 are suspect, but on most trials will pattern with easy PD. 
-
-In easyPD: P1 prefers BA > AA > BB > AB and P2 prefers AB > AA > BB > BA. AA is welfare maximizing.
-
-In hardPD: P1 prefers BA > AA > BB > AB and P2 prefers AB > AA > BB > BA. BA and AB are welfare maximizing.
-
+Another question is whether the amount of communication on a trial matters. Are more words more helpful? 
 
 ```{r}
-outcome %>%
-  filter(gametype == "PD") %>%
-  mutate(outcome_parity = ifelse(outcome %in% c("AA"), 1, 0)) %>%
-  ggplot(aes(x = str_c(chat_cond, "_", is_chat), y = outcome_parity)) +
-  facet_grid(. ~ cond) +
-  stat_summary(fun.data = "mean_cl_boot") +
-  geom_hline(aes(yintercept = .5)) +
-  labs(title = "PD:fraction choosing AA outcome")
+game_chat |> filter(words > 0) |> 
+   mutate( combo_type=str_c(gametype, "_", cond) |> factor(levels=c("PD_easy", "PD_normal", "PD_hard", "BoS_normal", "BoS_spike"))) |> 
+  ggplot(aes(x = words, y = mean_payout, color=combo_type)) +
+  scale_x_log10(breaks=c(1,5,25))+
+  scale_color_manual(values=pal)+
+  geom_point(alpha=.1) +
+  facet_grid(gametype ~ expt) +
+  geom_smooth(method = "lm", show.legend=F)+
+  guides(color = guide_legend(override.aes = list(alpha = 1, size=3)))+
+  theme(legend.position="bottom")+
+  labs(color="", x="Words in a trial", y="Payout")
 
-outcome %>%
-  filter(gametype == "PD") %>%
-  mutate(outcome_parity = ifelse(outcome %in% c("AB", "BA"), 1, 0)) %>%
-  ggplot(aes(x = str_c(chat_cond, "_", is_chat), y = outcome_parity)) +
-  facet_grid(. ~ cond) +
-  stat_summary(fun.data = "mean_cl_boot") +
-  geom_hline(aes(yintercept = .5)) +
-  labs(title = "PD:fraction choosing AB or BA outcome")
-
-outcome %>%
-  filter(gametype == "PD") %>%
-  mutate(outcome_parity = ifelse(outcome %in% c("BB"), 1, 0)) %>%
-  ggplot(aes(x = str_c(chat_cond, "_", is_chat), y = outcome_parity)) +
-  facet_grid(. ~ cond) +
-  stat_summary(fun.data = "mean_cl_boot") +
-  geom_hline(aes(yintercept = .5)) +
-  labs(title = "PD:fraction choosing BB outcome")
-```
-
-Can get a reasonable option no matter what. If you talk, you can get the uneven, but welfare-maximizing in hard PD. 
-
-
-
-Looks like using language tends to help, on the trials it's used on, and slightly on the trials it's not used on for BoS. Helps in some cases for PD. 
-
-Is there a dose-response relationship, or is one word enough?
-
-```{r}
-ggplot(game_chat |> filter(gametype == "BoS", words > 0), aes(x = log(words), y = mean_payout)) +
-  geom_point() +
-  facet_grid(gametype ~ cond) +
-  geom_smooth(method = "lm")
-
-ggplot(game_chat |> filter(gametype == "PD", words > 0), aes(x = log(words), y = mean_payout)) +
-  geom_point() +
-  facet_grid(gametype ~ cond) +
-  geom_smooth(method = "lm")
+#TODO label in not log space 
 ```
 
 Especially where we have more data, looks like one word is enough. Indicative of coordination rather than negotiation, probably? 
 
+A qualitative perusal of the data suggests various strategies. On a trial by trial reference basis, cells can be identified by color or color combination, sometimes even reducing to single letter (such as r for red). The numeric values can also be used to identify. 
 
-## Per game does talking help?
-
-One idea is that talking on some trials may set up coordination strategies that can then effectively be used on later trials without talking on those trials. 
-
-So we want to look at overall volume of talking (in words or in # of trial talked) as a predictor for performance, controlling for talk on that round? 
-
-```{r}
-group_talk <- game_chat |>
-  group_by(gameId) |>
-  summarize(total_words = sum(words), pct_chat = mean(is_chat))
-
-overall_talk <- game_chat |> left_join(group_talk)
-ggplot(overall_talk |> filter(gametype == "BoS", chat_cond == "chat"), aes(x = pct_chat, y = mean_payout, color = as.character(is_chat))) +
-  # stat_summary(fun.data="mean_cl_boot")+
-  # geom_point()+
-  facet_grid(gametype ~ cond) +
-  geom_smooth(method = "lm")
-
-ggplot(overall_talk |> filter(gametype == "PD", chat_cond == "chat"), aes(x = pct_chat, y = mean_payout, color = as.character(is_chat))) +
-  # stat_summary(fun.data="mean_cl_boot")+
-  # geom_point()+
-  facet_grid(gametype ~ cond) +
-  geom_smooth(method = "lm")
-```
-
-So, in mixed games, talking on more trials helps regardess of whether you talked on this particular trial. (Although overall talk might also be confounding with conscientiousness..., to fix you'd have to experimentally manipulate when chat is or isn't available)
-
-Talking more might help with hard PD, maybe in mixed?
-
-
-```{r}
-ggplot(overall_talk |> filter(gametype == "BoS", total_words > 0), aes(x = log(total_words), y = mean_payout, color = as.character(is_chat))) +
-  facet_grid(gametype ~ cond) +
-  geom_smooth(method = "lm")
-
-ggplot(overall_talk |> filter(gametype == "PD", total_words > 0), aes(x = log(total_words), y = mean_payout, color = as.character(is_chat))) +
-  facet_grid(gametype ~ cond) +
-  geom_smooth(method = "lm")
-```
-
-Here total words is going to mix how much you talk each time with how often you talk, so maybe this is just totally redundant with previous. More talk helps on BoS, even as transfer from other trials. PD seems messier? 
-
-
-
-
-# Language results: what do people say
-and what does this say about coordination strategies
-
-## Language 
-
-How much language? 
-
-Filter only for games that talked at least a little. 
-
-Second graph filters for *trials* that talked. 
-
-```{r}
-game_chat |>
-  group_by(gameId) |>
-  summarize(total_words = sum(words)) |>
-  filter(total_words != 0) |>
-  left_join(game_chat) |>
-  mutate(expt = str_sub(cond, -1)) |>
-  ggplot(aes(x = repNum, y = words)) +
-  geom_point() +
-  facet_wrap(~expt) +
-  geom_smooth()
-
-game_chat |>
-  group_by(gameId) |>
-  summarize(total_words = sum(words)) |>
-  filter(total_words != 0) |>
-  left_join(game_chat) |>
-  filter(words > 0) |>
-  mutate(expt = str_sub(cond, -1)) |>
-  ggplot(aes(x = repNum, y = words)) +
-  geom_point() +
-  facet_wrap(~expt) +
-  geom_smooth()
-```
-
-
-## how often do *both* people talk
-
-```{r}
-pair_chat <- all_chat %>%
-  filter(!is.na(targets)) %>%
-  select(-type) %>%
-  full_join(all_rounds) %>%
-  mutate(words = str_count(text, "\\W+") %|% int(0)) |>
-  group_by(gameId, playerId, gametype, cond, chat_cond, repNum) %>%
-  summarize(
-    words = sum(words),
-    is_chat = ifelse(words > 0, 1, 0)
-  ) |>
-  group_by(gameId, gametype, cond, chat_cond, repNum) |>
-  summarize(how_many_chat = sum(is_chat)) |>
-  group_by(gameId, gametype, cond, chat_cond) |>
-  summarize(pct_both = mean(how_many_chat == 2)) |>
-  filter(chat_cond == "chat")
-
-ggplot(pair_chat, aes(x = cond, y = pct_both)) +
-  geom_jitter(width = .2) +
-  facet_wrap(~gametype)
-```
-Even in games that talk, there aren't *that* many trials where both people talk? 
-
-Probably going to need to manually look at the language for negotiation v "choose red" "yup" etc. 
-
+Between the chat logs and the post game strategy notes, a number of strategies were identified. For example, some participants coordinated using the running score totals choosing the option that favored the person with a lower current score. Other identified strategies included fairness, being generous to the other person, or generally being fair but occassionally trying to take advantage and get a higher payout. 
 
 # Discussion 
 Some caveats: Despite our desire to use game-theory aligned paradigms for the analytic theory and predictions, the experiments had several factors that cause potential theoretical misalignment. 
@@ -613,8 +463,9 @@ Some caveats: Despite our desire to use game-theory aligned paradigms for the an
 
 2. The incentives of participants are not the same as the incentives of the "agents". People have values above money such as their reputation and desire to be nice to other people. Additionally, the monetary value participants get from the task is not what is shown in the boxes. They were paid a base rate for participation + a bonus aligned to task performance. Strategies of random clicking could be cost efficient if it means the task takes sufficiently shorter that base rate / short time is a better wage than (base rate + higher bonus)/ longer time. 
 
-3. 
+3. The repeated nature of the game and extra information such as running score allowed for coordinating in ways not available in the base single-shot games. 
 
+One of the hopes was to see if using language on some perhaps early trials would set up conventions or patterns that could then be successfully executed on later with no or little additional language. 
 
 # Appendix: Model Results
 
@@ -657,172 +508,62 @@ msum_loc="manuscript/model_files/summary"
 mform_loc="manuscript/model_files/formulae"
 ```
 
+## Payout models
+
+These models all predict bonus score as an outcome in terms of either the coarse grained conditions (PD v BoS) or the finer grained conditions, all with interactions with assigned chat condition. 
+
+Priors were normal(5,2) for intercept and normal(0,2) for beta and sd. Model were run both over all the experiments, and individually on each of experiments 3-5. Due to errors, we do not run separate models on 1 and 2. 
+
 ```{r}
-do_table("payout_mega.rds", cap="TODO")
-do_table("payout_mega_combo.rds", cap="TODO")
-do_table("payout_combo_3.rds", cap="TODO")
-do_table("payout_combo_4.rds", cap="TODO")
-do_table("payout_combo_5.rds", cap="TODO")
+do_table("payout_mega.rds", cap="Mega-analytic model predicting bonus based on coarse game type and chat condition.")
+do_table("payout_mega_combo.rds", cap="Mega-analytic model predicting bonus based on fine-grained game type and chat condition.")
+do_table("payout_combo_3.rds", cap="Model predicting bonus for experiment 3. ")
+do_table("payout_combo_4.rds", cap="Model predicting bonus for experiment 4. ")
+do_table("payout_combo_5.rds", cap="Model predicting bonus for experiment 5. ")
 
-do_table("BoS_aligned_mega.rds", cap="TODO")
-do_table("BoS_aligned_3.rds", cap="TODO")
-do_table("BoS_aligned_4.rds", cap="TODO")
-do_table("BoS_aligned_5.rds", cap="TODO")
+```
 
-do_table("PD_cooperate_mega.rds", cap="TODO")
-do_table("PD_cooperate_3.rds", cap="TODO")
-do_table("PD_cooperate_4.rds", cap="TODO")
-do_table("PD_cooperate_5.rds", cap="TODO")
+\FloatBarrier
+
+## BoS models
+
+Abstracting over the randomly selected payout values, we also examined each class of game by where the selections fell in the 2x2 grid. For BoS, due to symmetry, outcomes are either aligned (positive outcome) or misaligned (0 value outcome). We can look at the effect of chat on getting aligned outcomes. 
+
+These were logistic models with a prior of normal(0,1) for beta and sd. 
+
+```{r}
+do_table("BoS_aligned_mega.rds", cap="Mega-analytic model predicting occurrance of aligned outcome in BoS. ")
+do_table("BoS_aligned_3.rds", cap="Model predicting aligned BoS outcome for experiment 3. ")
+do_table("BoS_aligned_4.rds", cap="Model predicting aligned BoS outcome for experiment 4. ")
+do_table("BoS_aligned_5.rds", cap="Model predicting aligned BoS outcome for experiment 5. ")
+
+```
+
+## PD models 
+
+For PD, there are 3 different outcomes. The AA cooperative outcome, the AB/BA outcome, and the Nash equilibrium BB outcome. We ran separate logistic models for the occurrence of each outcome, although note that model results are inherently interdependent because each trial has exactly 1 of these outcomes. 
+
+These were logistic models with a prior of normal(0,1) for beta and sd. 
+
+```{r}
+do_table("PD_cooperate_mega.rds", cap="Mega-analytic model predicting AA outcomes in PD trials")
+do_table("PD_cooperate_3.rds", cap="Model predicting AA outcomes in PD trials for experiment 3.")
+do_table("PD_cooperate_4.rds", cap="Model predicting AA outcomes in PD trials for experiment 4.")
+do_table("PD_cooperate_5.rds", cap="Model predicting AA outcomes in PD trials for experiment 5.")
 
 
-do_table("PD_unneven_mega.rds", cap="TODO")
-do_table("PD_unneven_3.rds", cap="TODO")
-do_table("PD_unneven_4.rds", cap="TODO")
-do_table("PD_unneven_5.rds", cap="TODO")
+do_table("PD_unneven_mega.rds", cap="Mega-analytic model predicting AB/BA outcomes in PD trials. ")
+do_table("PD_unneven_3.rds", cap="Model predicting AB/BA outcomes in PD trials for experiment 3.")
+do_table("PD_unneven_4.rds", cap="Model predicting AB/BA outcomes in PD trials for experiment 4.")
+do_table("PD_unneven_5.rds", cap="Model predicting AB/BA outcomes in PD trials for experiment 5.")
 
 
-do_table("PD_nash_mega.rds", cap="TODO")
-do_table("PD_nash_3.rds", cap="TODO")
-do_table("PD_nash_4.rds", cap="TODO")
-do_table("PD_nash_5.rds", cap="TODO")
+do_table("PD_nash_mega.rds", cap="Mega-analytic model predicting BB (Nash equilibrium) outcomes in PD trials.")
+do_table("PD_nash_3.rds", cap="Model predicting BB outcomes in PD trials for experiment 3.")
+do_table("PD_nash_4.rds", cap="Model predicting BB outcomes in PD trials for experiment 4.")
+do_table("PD_nash_5.rds", cap="Model predicting BB outcomes in PD trials for experiment 5.")
 
 
 
 ```
 
- [1] "BoS_aligned_3.rds"     "BoS_aligned_4.rds"     "BoS_aligned_5.rds"    
- [4] "BoS_aligned_mega.rds"  "payout_mega_3.rds"     "payout_mega_4.rds"    
- [7] "payout_mega_combo.rds" "payout_mega.rds"       "PD_cooperate_3.rds"   
-[10] "PD_cooperate_4.rds"    "PD_cooperate_5.rds"    "PD_cooperate_mega.rds"
-[13] "PD_nash_3.rds"         "PD_nash_4.rds"         "PD_nash_5.rds"        
-[16] "PD_nash_mega.rds"      "PD_unneven_3.rds"      "PD_unneven_4.rds"     
-[19] "PD_unneven_5.rds"      "PD_unneven_mega.rds"  
-
-## payout models
-
-First up, payout models. 
-
-## BoS alignment models
-
-
-## PD alignment models
-
-In easyPD: P1 prefers BA > AA > BB > AB and P2 prefers AB > AA > BB > BA. AA is welfare maximizing.
-
-In hardPD: P1 prefers BA > AA > BB > AB and P2 prefers AB > AA > BB > BA. BA and AB are welfare maximizing.
-
-
-TODO run Bayesian
-TODO save Bayesian
-TODO tables 
-
-# Random crap
-
-
-
-## Condition assignment on performance
-
-```{r, eval=F}
-perf_priors <- c(
-  set_prior("normal(5,2)", class = "Intercept"),
-  set_prior("normal(0, 2)", class = "b"),
-  set_prior("normal(0, 2)", class = "sd"),
-  set_prior("lkj(1)", class = "cor")
-)
-
-perf_mod <- brm(
-  payoff ~ has_chat * is_BoS + repNum +
-    (is_BoS | gameId) +
-    (is_BoS | playerId),
-  data = for_mod,
-  prior = perf_priors,
-  control = list(adapt_delta = .95)
-)
-
-perf_mod_tot <- brm(
-  payoff ~ (use_chat | has_chat) * is_BoS +
-    repNum +
-    (is_BoS | gameId) +
-    (is_BoS | playerId),
-  data = for_mod,
-  prior = perf_priors,
-  control = list(adapt_delta = .95)
-)
-
-freq_tot <- lm(payoff ~ (use_chat | has_chat) * is_BoS +
-  repNum, data = for_mod)
-```
-
-## Words over time 
-
-log(words) ~ game_type * trial_number
-
-```{r, eval=F}
-for_log_words <- for_mod |>
-  filter(words > 0) |>
-  mutate(log_words = log(words))
-
-lang_priors <- c(
-  set_prior("normal(5,5)", class = "Intercept"),
-  set_prior("normal(0, 5)", class = "b"),
-  set_prior("normal(0, 5)", class = "sd"),
-  set_prior("lkj(1)", class = "cor")
-)
-
-log_words_mod <- brm(
-  log_words ~ is_BoS * repNum +
-    (is_BoS * repNum | gameId),
-  data = for_log_words,
-  prior = lang_priors,
-  control = list(adapt_delta = .95)
-)
-```
-
-## Words on outcome
-
-outcome ~ game_type * log(words)
-
-```{r, eval=F}
-perf_word_mod <- brm(
-  payoff ~ log_words * is_BoS + repNum +
-    (is_BoS | gameId) +
-    (is_BoS | playerId),
-  data = for_log_words,
-  prior = perf_priors,
-  control = list(adapt_delta = .95)
-)
-```
-
-
-```{r, eval=F}
-ggplot(for_log_words, aes(x = log_words, y = payoff, color = repNum)) +
-  geom_jitter(alpha = .5) +
-  geom_smooth(method = "lm") +
-  facet_wrap(is_BoS ~ cond)
-```
-
-TODO think more about!!
-outcome ~ log(words_first_10)*game_type*words_now ? 
-
-```{r, eval=F}
-early_words <- for_mod |>
-  filter(repNum < 10) |>
-  group_by(gameId) |>
-  summarize(early_words = sum(words))
-
-for_early_word_mod <- for_mod |>
-  filter(repNum > 9) |>
-  left_join(early_words) |>
-  filter(early_words > 0) |>
-  mutate(log_early_words = log(early_words))
-
-early_word_mod <- brm(
-  payoff ~ log_early_words * is_BoS * is_chat + repNum +
-    (is_BoS | gameId) +
-    (is_BoS | playerId),
-  data = for_early_word_mod,
-  prior = perf_priors,
-  control = list(adapt_delta = .95)
-)
-```
--->
