@@ -60,7 +60,6 @@ Thus, we still suspect that there probably is something interesting about when l
 
 All data and code is available. 
 
-# Methods
 ```{r set-up, include=F}
 knitr::opts_chunk$set(
   out.width = "\\textwidth",
@@ -189,16 +188,26 @@ stats_text <- function(model, row, decimal = 2) {
 		
 ```
 
+# Methods
+We conducted a series of 5 real-time online experiments where pairs of participants were matched to play a sequence of 40 2x2 games together. Across the experiments, we varied the exact structure of trials, but all experiments involved trials with reward structures modeled on BoS and PD. 
 
-## Overall methods
+## Participants
+The number of participants included in each condition (after incomplete games were excluded) is shown in Table \ref{participants}. We recruited participants via Prolific and directed them to our website where they were paired up to play a game with another participant in real time. 
+## Procedure
 
-All experiments were implemented in Empirica (v1). We recruited participants via Prolific and directed them to our website where they were paired up to play a game with another participant in real time. 
+All experiments were implemented in Empirica (v1). The experiment consisted first of consent and instruction. 
 
-The experiment consisted first of consent and instructions. Then participants (in all conditions) were given 3 minutes to freely chat with their partner using the chat box. Instructions for experiments 1-3 were: "You may have seen similar games where your partner is really a bot. This isn't one of those! You have been paired with another human participant who was also recruited from Prolific at the same time." In experiments 4 and 5, conducted after the widespread awareness of LLM chatbots like Chat-GPT, we became more explicit: "We are aware that there are similar games where your partner is a bot (or ChatGPT). *THIS IS NOT ONE OF THOSE.* We are cognitive scientists at a university, and our ethics approval (IRB) doesn't allow us to deceive participants. You have been paired with another participant who was also recruited from Prolific via the same task you were." This was intended to convince participants their partner really was human and not a bot (after high "is a bot" ratings in pre-experiment-1 pilot studies). A few potential prompts for conversation were given.
+Then participants were matched with their partner and given 3 minutes to freely chat with their partner using the chat box. This initial free-chat was intended to convince participants their partner really was human and not a bot (after high levels of pilot participants reported they thought they had been playing with a bot). A few potential prompts for conversation were given. Instructions for experiments 1-3 were: "You may have seen similar games where your partner is really a bot. This isn't one of those! You have been paired with another human participant who was also recruited from Prolific at the same time." In experiments 4 and 5, conducted after the widespread awareness of LLM chatbots like Chat-GPT, we became more explicit: "We are aware that there are similar games where your partner is a bot (or ChatGPT). *THIS IS NOT ONE OF THOSE.* We are cognitive scientists at a university, and our ethics approval (IRB) doesn't allow us to deceive participants. You have been paired with another participant who was also recruited from Prolific via the same task you were." 
 
-Then participants moved onto the main experiment, where on each trial, they saw a payout grid for differently colored treasure chests and were asked to click which chest they wanted to open. Each pair completed 40 trials, with the payoffs dependent on the experiment condition (see below). In experiments 1,2,3 and 5, participants saw a running bonus score for themselves and their partner, as their bonus payment was proportional to the sum of the rewards they owned. On experiment 4, participants were instead paid proportional to the results of 4 randomly selected trials, and were not shown a cumulative payoff score. 
+```{r,fig.cap="The user interface. Participants saw a reward table and selected what box to open. \\label{ui}"}
+knitr::include_graphics("overview.png")
+```
 
-After the experiment, participants completed a survey about their experience, including their strategy and whether they thought they were playing with a real person, before seeing a debrief and being redirected back to prolific to receive payment. 
+After the three minutes, participants moved onto the main experiment.  On each trial, they saw a payout grid for differently colored treasure chests and were asked to click which chest they wanted to open (Figure \ref{ui}). Each pair completed 40 trials, with the payoffs dependent on the experiment condition (see below). Participants in the "chat" condition could message their partner freely during the trials using a chat interface; participants in the "no chat" condition did not have access to the chat during the main experiment. 
+
+In experiments 1,2,3 and 5, participants saw a running bonus score for themselves and their partner, as their bonus payment was proportional to the sum of the rewards they earned. On experiment 4, participants were instead paid proportional to the results of 4 randomly selected trials, and were not shown a cumulative payoff score. 
+
+After the experiment, participants completed a survey about their experience, including their strategy and whether they thought they were playing with a real person, before seeing a debrief and being redirected back to Prolific to receive payment. 
 
 ```{r}
 all_rounds |>
@@ -211,56 +220,52 @@ all_rounds |>
   kable(caption = "Number of participants in each experiment and each condition. \\label{participants}")
 ```
 
-## Conditions
-For all experiments, we set parameters for the ratios between trial types and the ranges of payout values for each trial type. We used a sampling and randomization approach (see code for details), so different games saw different orders of trials and different values of trials, from the same distributions. 
+## Trial types 
+We sampled different types of trials across different experiments. For each trial type, we constructed trials by randomly sampling reward values subject to some constraints. Examples of each trial type are shown in Figure \ref{payoff-matrix}
 
-All experiments did both chat and no-chat versions as a between groups manipulation. The number of participants in each experiment and condition is in Table \ref{participants}. 
-TODO diagram 
+**Normal PD** trials were created by sampling 3 values from 1-9 (without replacement) for the payoffs, with 0 always as the sucker payoff, with the preference order corresponding to PD structure.
 
-Trial types:
+When randomly sampling numbers to populate PD trials, generally, the welfare maximizing option (highest summed reward) comes from both cooperating. Sometimes, however the payout for defecting is greater than twice the both-cooperate value and so the welfare maximizing option is to agree to defect-cooperate. Thus, in this situation, one might be able to cooperate for an overall better outcome than could otherwise be achieved. We anecdotally observed this occur rarely in normal PD games in early experiments, so in later experiments, we explicitly sampled PD games based on which of both-cooperate or defect-cooperate was welfare-maximizing. 
 
-* normal PD trials were created by sampling 3 values from 1-9 (without replacement) for the payoffs, with 0 always as the sucker payoff, with the preference order corresponding to PD structure.
+**Easy PD** trials (Figure \ref{payoff-PDeasy}) were created by sampling 3 values from 1-12 (without replacement) for the payoffs, with 0 always as the sucker payoff, conditioned on the second highest payoff (AA) being at least half of the highest AB/BA payoff. This ensured that the total payoff for AA was greater than or equal to the defect payoff. 
 
-* easy PD trials were created by sampling 3 values from 1-12 (without replacement) for the payoffs, with 0 always as the sucker payoff, conditioned on the second highest payoff (AA) being at least half of the highest AB/BA payoff. This ensures that the total payoff for AA is greater than or equal to the defect payoff. 
+**Hard PD** trials (Figure \ref{payoff-PDhard})  were created by sampling 3 values from 1-12 (without replacement) for the payoffs, with 0 always as the sucker payoff, conditioned on the highest payoff (AB/BA) being greater than double the cooperate AA payoff. This ensured that the defect payoff for AB/BA was greater than the total payoff for both cooperating. We predicted that cooperation and communication might lead to better outcomes in hard PD if participants coordinated on the welfare-maximizing but unequal AB or BA outcomes. 
 
-* hard PD trials  were created by sampling 3 values from 1-12 (without replacement) for the payoffs, with 0 always as the sucker payoff, conditioned on the highest payoff (AB/BA) being greater than double the cooperate AA payoff. This ensures that the defect payoff for AB/BA is greater than the total payoff for both cooperating. 
+**Normal BoS** trials (Figure \ref{payoff-BoSnormal}) were created by sampling from 2-9 (without replacement) for the AA and BB payoffs. The off diagonal payoffs were always 0. We predicted that communication would aid in coordinating which of AA or BB to choose. 
 
-* normal BoS trials were created by sampling from 2-9 (without replacement) for the AA and BB payoffs. THe off diagonal payoffs were always 0. 
+**Spike BoS** trials (Figure \ref{payoff-BoSspike}) were created from sampling one reward from 3-7 and one reward from 25-30. Off diagonal payoffs were always 0. We thought the higher rewards might lead to higher stakes and thus incentivize coordinating or negotiating about the selection more than in normal BoS trials. 
 
-* spike BoS trials were created from sampling one reward from 3-7 and one reward from 25-30. Off diagonal payoffs were always 0. 
+## Experiment conditions
+For all experiments, we set parameters for the ratios between trial types and the ranges of payout values for each trial type. We used a sampling and randomization approach, so different games saw different orders of trials and different values of trials, from the same distributions. 
 
-Experiments:
+All experiments had presence of chat as a between-groups manipulation. The number of participants in each experiment and condition is in Table \ref{participants}. 
 
-*Expt 1* (https://osf.io/8fnze): Between - group manipulation of either all normal PD trials or all normal BoS trials. 
+Here we briefly describe the set of trial types used in each experiment and link to the individual pre-registrations. 
 
-*Expt 2* (https://osf.io/5au2r): A within-group version of experiment 1. Each game had roughly half and half normal PD and normal BoS trials.
+**Expt 1** (https://osf.io/8fnze): A between-group manipulation of either all normal PD trials or all normal BoS trials. 
 
-During data analysis for experiment 2, we realized that we had been misdisplaying the off diagonal rewards for PD for one player in each game. This was fixed for subsequent experiments.
+**Expt 2** (https://osf.io/5au2r): A within-group version of experiment 1. Trials were sampled from a 50/50 distribution of normal BoS and normal PD trials. 
 
-*Expt 3* (https://osf.io/c274z): Each game had a mix of easy PD, hard PD, normal BoS, and spike BoS.  Of the 40 trials, exactly 4, at pre-set locations in the trial order were spike BoS where one of the rewards was substantially higher than the other. Due to the higher stakes, we thought pairs might coordinate more on these trials. The other trials were sampled  in a 16:10:10 ratio from normal BoS, easy PD and hard PD for an overall roughly half BoS and half PD mixture. 
+During data analysis for experiment 2, we realized that we had mis-displayed the off-diagonal rewards for PD for one player in each game in experiments 1 and 2. This was fixed for subsequent experiments.
 
-When randomly sampling numbers to populate PD trials, generally, the welfare maximizing option (highest summed reward) comes from both cooperating. Sometimes, however the payout for defecting is greater than twice the both-cooperate value and so the welfare maximizing option is to agree to defect-cooperate. Thus, in this situation, one might be able to cooperate for an overall better outcome than could otherwise be achieved, so we aimed to see whether people would recognize this type and whether language use would help. 
+**Expt 3** (https://osf.io/c274z): Each game had a mix of easy PD, hard PD, normal BoS, and spike BoS trials.  Of the 40 trials, exactly 4, at pre-set locations in the trial order were spike BoS trials. Due to the higher stakes, we thought pairs might coordinate more on these trials. The other trials were sampled in a 16:10:10 ratio from normal BoS, easy PD, and hard PD for an overall roughly half BoS and half PD mixture. 
 
-*Expt 4* (https://osf.io/fymjc): In experiment 4, we tried to get a set-up that was closer to the predictions from game theory. We switched from providing a bonus proportional to the overall points earned to an incentive compatible bonus that sampled 4 trials at random and paid out those points. We also removed the points counter, given that participants previously reported using the visible money earned so far as a coordination locus. Games were a mix of roughly half easy PD and half normal BoS. 
+**Expt 4** (https://osf.io/fymjc): In experiment 4, we aimed for a set-up that was closer to the predictions from game theory.We removed the points counter, given that participants in prior experiments sometimes used the visible money earned so far as a locus for coordination. We switched from providing a bonus proportional to the overall points earned to an incentive compatible bonus that sampled 4 trials at random and paid out those points. Because the games that mattered were unknown and randomly sampled, we reasoned that the rational strategy might be closer to the formal predictions of one-shot games. Trials were sampled from a 50/50 distribution of easy PD and normal BoS.
 
-*Expt 5* (https://osf.io/ksjmv): After a less successful experiment 4, we went back to the design of experiment 3. The condition distribution and incentive structure of experiment 5 was identical to experiment 3. Experiment 5 retained the modified pre-chat from experiment 4 that emphasized the absense of chatbots. 
+**Expt 5** (https://osf.io/ksjmv): After a disappointing experiment 4, we returned to the design of experiment 3 and collected a larger sample. The condition distribution and incentive structure of experiment 5 was identical to experiment 3.
 
 ## Data processing
-All data processing was done in R, the code is available. TODO
+We excluded participant pairs that did not finish. Data processing and analysis was done in R. We ran regression models in BRMS and report the point estimates and 95% credible intervals. 
+
+Experimental code, data, and analysis scripts are all available at https://github.com/vboyce/game-theory-language. 
 
 # Results
 
-the goal was to look at how people might use langauge to coordinate and thus achieve better outcomes than they could without language. We were also interested in what sort of coordination language might be used, and whether procedural or meta-conventions might occur. 
-
-In terms of outcomes, we can look at points earned (which includes the random noise from what the points spreads were). We can also look at what outcome quadrant participants are selecting. 
-
-One issue that arose was that we had some difficulty convincing participants their partners were indeed real humans, and substantial difficulty creating a situation where people in the chat condition would choose to use the chat. 
-
-We also do analysis breaking out our chat condition into whether or not people chose to use the chat. However, this breaks the randomization and introduces as confounds any exogenous factor (other than access to chat) that determines whether people chat (i.e. contentiousness, motivation, etc). 
+Our goal was to test hypotheses around when using language would allow people to achieve better outcomes in a strategic game than they could without using language to coordinate. We also hoped to explore what sort of language use would be used for coordination, whether any negotiation would occur, and whether procedural and meta-conventions might occur. 
 
 ## Manipulation results
 
-The interpretability of results depends on two factors: a) whether participants generally think they are playing with another human and b) whether chat use actually differs substantially by condition. 
+The interpretability of results depended on two factors: a) whether participants generally thought they were playing with another human and b) whether chat use actually differed substantially by chat condition. 
 
 
 ```{r bot}
@@ -314,12 +319,9 @@ exit |>
   kable(caption = "Percent of participants in each condition who thought their partner was human as reported in an exit survey. \\label{human}")
 ```
 
-For the most part, we succeeded in convincing players their partner was indeed human (Table \ref{human}). Rates of believing partner was human were slightly higher in the chat conditions than no-chat conditions. 
+In the exit survey, we asked participants if they thought their partner was human. For the most part, we succeeded in convincing players their partner was indeed human (Table \ref{human}). Rates of believing partner was human were slightly higher in the chat conditions than no-chat conditions. 
 
-Our other manipulation check was how well participants took up the manipulation of being able to use a chat to communicate with their partner. 
-
-As shown in Figure  \ref{chat-pct}, groups vary substantially in how many trials they use the chat on, but many groups rarely use the chat. The horizontal lines correspond to 10% and 50% of the time, so games lower than the 10% line are using chat on fewer than 4 (out of 40) trials. There's a lot of not chatting in the access-to-chat condition.  
-
+Our primary manipulation of interest was whether or not participants were assigned to the chat condition, where they could use a chat to communicate with their partner, or the no-chat condition where they could not. For groups in the chat condition, the rate of chat usage varied widely, with many participants who had access to chat not using it. As shown in Figure \ref{chat-pct}, many groups rarely use the chat. The low uptake of the chat manipulation considerably reduces our ability to determine how chat usage impacts performance. 
 
 ```{r chat-pct, fig.width=10, fig.height=3, fig.cap="In chat conditions, how many trials each game choose to use the chat at all. Within each experiment, games are arranged in frequency of chat use. Horizontal lines denote 10% and 50% use of chat. \\label{chat-pct}"}
 
@@ -355,6 +357,7 @@ game_chat |>
 
 ## Main results
 
+Despite the low rates of chat usage, we focus our main analyses on the impact of the (assigned) chat condition. 
 
 ```{r}
 msum_loc="manuscript/model_files/summary"
@@ -377,16 +380,8 @@ PD_unneven <- read_rds(here(msum_loc, "PD_unneven_mega.rds"))
 
 ```
 
-The prediction is that having access to the communication modality will be helpful for aligning coordination in BoS where both players want to choose the same thing. 
-
-Coordination should be less helpful in PD. According to theory, for single-shot, rational actors should choose the nash equilibrium. Participants are nicer than that and instead coordinate on the unstable mutually beneficial equilibrium. 
-
-After observing that occasionally there were PD trials were the welfare-maximizing option was for one person to get a large payout and the other to get nothing (called "hard" or "sacrifice" PD trials in expt 3 onwards), we explicitly sampled both this "hard" structure where the best overall outcome is to coordinate on one person getting the big reward and balance out later by switching off. 
-
-In contrast, we refer to the trials in which only one option is welfare maximizing as "easy PD" where we do not expect language to help. 
-
-The first way we assess whether access to chat makes a difference on game performance is to look at the mean number of points received per trial. Because BoS and PD have different point structures, we compare within game type. 
-
+The predictions are that a communication channel should improve performance in BoS trials where communication is credible and can be used to coordinate but that communication channels should not improve performance in PD trials where communication is not credible. 
+According to formal game theory, for single-shot games, rational actors should take actions that lead to Nash equilibria. Both AA and BB are equilibria in BoS, and only BB is a Nash equilibrium in PD. 
 
 ```{r points, fig.cap="Rewards achieved per trial depending on experiment, game condition, and chat condition. \\label{points}"}
 
@@ -414,16 +409,17 @@ guides(color = guide_legend(override.aes = list(alpha = 1, size=3)))+
     axis.title.x=element_blank()
   )
 ```
-Points earned per trial in different games are shown in Figure \ref{points}, which suggests slight differences in reward for BoS games depending on chat versus nochat condition, and no differences for PD. 
-In a model of payouts by coarse conditions (BoS v PD), there is an interaction between condition and chat condition where chat condition leads to higher payout for BoS (`r stats_text(payout_mega, 4)`). Using finer grained measures of condition, and treating "easy PD" as baseline, there are interactions between chat and both normal BoS (`r stats_text(payout_combo, 7)`) and spike BoS (`r stats_text(payout_combo, 8)`). The same directionality occurs in individual experiments, but with wide credible intervals. In Experiment 3, the chat interaction with normal BoS is `r stats_text(payout_3, 6)` and with spike BoS is `r stats_text(payout_3, 7)`. In Experiment 4, the interaction between chat and normal BoS is `r stats_text(payout_4, 4)`. In Experiment 5, the chat interaction with normal BoS is `r stats_text(payout_5, 6)` and with spike BoS is `r stats_text(payout_5, 7)`. Full model results are in the Appendix. 
 
 
-In BoS, there is a generally a slightly higher score in the chat condition than the nochat condition, whereas there is not a difference between condtions in PD. 
+We first analyse participant's per-trial rewards in terms of trial type and chat condition. Because each trial type had a different sampling range, points are not directly comparable across conditions. Points earned per trial in different games are shown in Figure \ref{points}. Visually, there are slightly higher average rewards for chat BoS games than no-chat BoS games, and no visible effect of chat condition on PD outcomes. 
 
-Looking at points introduces some noise as the points were varying even within a type of game. To understand more what is being selected, we can look at what quadrant games are ending up in.
+In a mega-analytic model of rewards predicted by coarse trial type (BoS v PD) across all expeirments, trial type and chat condition interacted in the expected direction, where chat condition led to higher rewards for BoS (`r stats_text(payout_mega, 4)`). We also ran a mega-analytic model using fine grained trial types and treating easy PD as the baseline condition, again pooling across all experiments. Here, there was an interaction effect between chat and normal BoS (`r stats_text(payout_combo, 7)`) and between chat and spike BoS (`r stats_text(payout_combo, 8)`). 
 
+When we analyze results on a per-experiment basis, as originally planned, the interaction results are directionally consistent, but with wide credible intervals that sometimes overlap 0. In Experiment 3, the chat interaction with normal BoS is `r stats_text(payout_3, 6)` and with spike BoS is `r stats_text(payout_3, 7)`. In Experiment 4, the interaction between chat and normal BoS is `r stats_text(payout_4, 4)`. In Experiment 5, the chat interaction with normal BoS is `r stats_text(payout_5, 6)` and with spike BoS is `r stats_text(payout_5, 7)`. Estimates for all coefficients in these models are in the Appendix. 
 
-### Quadrant analysis per trial
+To summarize, the only effect of chat that we find is a very weak interaction effect where access to chat marginally improves outcomes in BoS games. However, the effect is hard to quantify due to the low rates of chat usage, even in the chat condition. 
+
+Rewards were randomly sampled, which introduces noise. To look at participant selections more discretely, we also examine how frequently trials end up in each outcome quadrant. 
 
 ```{r}
 outcome <- all_rounds %>%
@@ -435,7 +431,7 @@ outcome <- all_rounds %>%
 
 ```
 
-For BoS, the desirable outcome is to both choose the same box. As can be seen in Figure \ref{bosquad}, this good outcome is achieved at above change levels when people can chat and usually at chance levels when people cannot. Across experiments, the chat condition has a higher rate of good (aligned) outcomes (`r stats_text(bos_aligned, 3)`). The estimates are less certain for individual experiments. In experiment 3 the effect was `r stats_text(bos_3, 3)`; in experiment 4, `r stats_text(bos_4,2)`; and in experiment 5, `r stats_text(bos_5,3)`. 
+For BoS, the desirable outcome is to both choose the same box, with player X preferring the AA outcome and player Y preferring the BB outcome. As can be seen in Figure \ref{bosquad}, a good outcome is usually achieved at above chance levels in the chat condition and at chance levels in the no-chat condition. Across experiments, the chat condition has a higher rate of good (aligned) outcomes (`r stats_text(bos_aligned, 3)`). The estimates are less certain for individual experiments. In experiment 3 the effect was `r stats_text(bos_3, 3)`; in experiment 4, `r stats_text(bos_4,2)`; and in experiment 5, `r stats_text(bos_5,3)`. 
 
 ```{r bosquad, fig.cap="For BoS trials, how frequently pairs made coordinated selections that recieved rewards. \\label{bosquad} ", fig.height=3, fig.width=8}
 outcome %>%
@@ -449,12 +445,7 @@ outcome %>%
   labs(y = "Good outcome?", x="Chat condition", color="")+
   theme(legend.position="bottom")
 ```
-We again note that the off-diagonal rewards were misdisplayed for one of the players in experiments 1 and 2 for PD. On most trials "normal_PD" will pattern with easy PD. 
-
-In easyPD: P1 prefers BA > AA > BB > AB and P2 prefers AB > AA > BB > BA. AA is welfare maximizing.
-
-In hardPD: P1 prefers BA > AA > BB > AB and P2 prefers AB > AA > BB > BA. BA and AB are welfare maximizing.
-
+For PD trials, there are three distinct outcomes. If both players cooperate, the outcome is AA and each gets a moderately high payoff. If both players defect, the outcome is BB, the Nash equilibrium, and each player get a low payoff. If one player cooperates and the other defects, the outcome is AB (or BA), and one player get a high payoff and the other gets 0. From a perspective of wefare-maximization, the selection with best total reward is AA in easy PD and AB/BA in hard PD. We expect normal PD to generally be the of the type easy PD; and again note that the errors in displaying off-diagonal rewards would primarily affect hard PD type trials, where off diagonal options are more attractive. The rates of selecting each of the three outcome options by experiment and conditions are shown in Figure \ref{quad}. 
 
 ```{r , fig.cap="For PD trials, how frequently pairs made selections that results in each type of outcome. AA is the cooperate outcome, AB/BA is mixed -- one cooperate, one defect, BB is both defect. \\label{pdquad} ", fig.height=5, fig.width=8}
 outcome %>%
@@ -472,11 +463,15 @@ outcome %>%
   labs(y="fraction selected", x="Chat condition", color="")+
   theme(legend.position="bottom")
 ```
-From Figure \ref{pdquad}, we see that the preferred outcome is AA which is welfare-maximizing in easy PD. This is not what game theory predicts for rational actors, instead, participants are being nice and cooperative with each other. 
+A first observation is that the generally preferred option, across games and conditions, is AA, the higher-value equal outcome spot. Notably, this is not the Nash equilibrium that is predicted by game theory for rational actors in a finite time horizon situation. However, human participants seem to be nicer and more cooperative with each other, regardless of whether chat is available. 
 
-Overall, for PD, the preference was to align on the fair-but-high square, regardless of whether chat was available. In the hard PD, AA selections were less common (`r stats_text(PD_cooperate, 2)`) and AA selections were slightly lowered still by a hard PD x chat interaction (`r stats_text(PD_cooperate, 5)`). The interaction effect had a credible interval overlapping 0 when experiments 3 or 5 were analyzed individually.  In parallel, there was a hard PD x chat interaction increasing the rate of AB/BA selections (`r stats_text(PD_unneven, 5)`), consistent with the idea that this is the best outcome for hard PD, but requires more complex coordination to achieve. 
+In hard PD trials, AA selections were less common than in easy PD trials (`r stats_text(PD_cooperate, 2)`) and AA selections were slightly lowered still by a hard PD x chat interaction (`r stats_text(PD_cooperate, 5)`), when all experiments were analyzed together. The interaction effect had a credible interval overlapping 0 when experiments 3 or 5 were analyzed individually. 
 
-Overall, the results based on condition assignment are consistent with the prediction that language would be more beneficial for BoS than for PD. However, conditional differences are small and often noisy (presumably due to low update of using language), and so the experiments do not provide compelling evidence. 
+In parallel, the rate of AB/BA selections was increased by a hard PD x chat interaction (`r stats_text(PD_unneven, 5)`), consistent with the idea that from a total points perspective, this is the best outcome for hard PD, but requires more complex coordination to achieve. 
+
+Overall, the results based on condition assignment are consistent with the prediction that language would be more beneficial for BoS than for PD. However, condition differences were small and often noisy (presumably due to low update of using language), and so the experiments do not provide compelling evidence. Additionally, the analytic import of using well-studied game theory scenarios with predictions about the utility of language is weakened by the inconsistency between predicted behaviors in the PD condition and actual selections. 
+
+TODO you are here! 
 
 ## Uptake results
 
