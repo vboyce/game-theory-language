@@ -12,7 +12,7 @@ authors:
     department: Department of Psychology
     affiliation: Stanford University
 abstract: |
-  How do we use language to coordinate with each other? This question is of interest both from the cognitive science of language perspective as well as the game theory perspective. Here we attempt to bridge the gap between the empirical tradition of studying language use for coordination in reference games with the theoretical and analytic framework of game theory. We conducted a series of 5 real-time online experiments where pairs of participants were matched to play a sequence of 40 2x2 games together (total N=616). Across the experiments, we varied the exact structure of trials, but all experiments involved trials with reward structures modeled on Prisoner's Dilemma (PD) and Bach or Stravinsky (BoS). We manipulated the presence or absence of a chat interface as a between-pairs manipulation. Despite low levels of use of the communication channel, we found slight differences in outcome between the chat and nochat groups, where pairs who could communicate were slightly more likely to reach coordinated beneficial outcomes in BoS games. In contrast to the predictions of rational actors, participants in both chat and no-chat conditions generally aligned on both cooperating rather than both defecting in PD. Overall, we were limited in our ability to discern the role of communication channels in game strategies due to low uptake in using the communication channels when available. 
+  How do we use language to coordinate with each other? This question is of interest both from the cognitive science of language perspective as well as the game theory perspective. Here we attempt to bridge the gap between the empirical tradition of studying language use for coordination in reference games with the theoretical and analytic framework of game theory. We conducted a series of 5 real-time online experiments where pairs of participants were matched to play a sequence of 40 2x2 games together (total N=616). Across the experiments, we varied the exact structure of trials, but all experiments involved trials with reward structures modeled on Prisoner's Dilemma (PD) and Bach or Stravinsky (BoS). We manipulated the presence or absence of a chat interface as a between-pairs manipulation. Despite low levels of use of the communication channel, we found slight differences in outcome between the chat and no-chat groups, where pairs who could communicate were slightly more likely to reach coordinated beneficial outcomes in BoS games. In contrast to the predictions of rational actors, participants in both chat and no-chat conditions generally aligned on both cooperating rather than both defecting in PD. Overall, we were limited in our ability to discern the role of communication channels in game strategies due to low uptake in using the communication channels when available. 
   
 bibliography: references.bib
 biblio-style: unsrt
@@ -41,13 +41,13 @@ header-includes:
 
 How do we use language to coordinate with each other? This question is of interest both from the cognitive science of language perspective as well as the game theory perspective. 
 
-In studies of conversation, there's work on how people align with each other in their word use when doing joint task and how repeatedly referring to the same targets in a matching game leads to the formation of linguistic conventions. As reference is a key part of other linguistic speech acts such as negotiation, coordinating actions, or persuasion, one might wonder whether referential coordination can also be seen during interactions in pursuit of these more complex goals. In a similar vein, more complex situations may allow for linguistic alignment and convention formation not just of terms of reference but of terms for entire strategic approaches. One could also imagine alignment in approach, creating a conventional structure for how to coordinate or negotiate. (todo possible citations)
+In studies of conversation, there's work on how people align with each other in their word use when doing joint task and how repeatedly referring to the same targets in a matching game leads to the formation of linguistic conventions. As reference is a key part of other linguistic speech acts such as negotiation, coordinating actions, or persuasion, one might wonder whether referential coordination can also be seen during interactions in pursuit of these more complex goals. In a similar vein, more complex situations may allow for linguistic alignment and convention formation not just of terms of reference but of terms for entire strategic approaches. One could also imagine alignment in approach, creating a conventional structure for how to coordinate or negotiate.
 
 Despite the relevance of these questions, from both a linguistic perspective and an applied psychology perspective, the large body of work on conversational alignment and referential communication has rarely branched out to situations where incentives are not fully aligned between agents. 
 
-In prior work, we tried to look at the role of language in a 3-player negotiation game where incentives were either fully-aligned or competitive between players [@mankewitz2021; @boyce2023b]. We found some evidence that language use improved performance, and that the referential language used to pick out targets showed some signs of conventionalization over time. However, this was a game we had created, so there were not theoretical or analytic predictions about what the optimal strategies were either with or without language, and therefore, when or how communication (via language) might improve performance. 
+In prior work, we tried to look at the role of language in a 3-player negotiation game where incentives were either fully-aligned or competitive between players [@mankewitz2021; @boyce2023flowers]. We found some evidence that language use improved performance, and that the referential language used to pick out targets showed some signs of conventionalization over time. However, this was a game we had created, so there were not theoretical or analytic predictions about what the optimal strategies were either with or without language, and therefore, when or how communication (via language) might improve performance. 
 
-Game theory provides a formalism for understanding rational action when different actors have different incentive structures over outcomes that are jointly determined by the choices of all the actors. There is some theoretical work analyzing how communication availability may shift the strategies in games and thus when communicative acts are credible signals versus cheap talk [@cooper1992; @foerster2021; @baliga2002]. Game theory economic games have been used to empirically study questions such as social prediction [@vanbaar2021], emotional signals [@demelo2020], and coordination [@duguid2014]. Some studies test predictions about the role of communication in economic games [@crandall2018; @cross; @crawford2019a]. (todo: check/reread citations, possible find more citations?)
+Game theory provides a formalism for understanding rational action when different actors have different incentive structures over outcomes that are jointly determined by the choices of all the actors. There is some theoretical work analyzing how communication availability may shift the strategies in games and thus when communicative acts are credible signals versus cheap talk [@cooper1992; @foerster2021; @baliga2002]. Game theory economic games have been used to empirically study questions such as social prediction [@vanbaar2021], emotional signals [@demelo2020], and coordination [@duguid2014]. Some studies test predictions about the role of communication in economic games [@crandall2018; @cross2020; @crawford2019a].
 
 In our current work, we attempted to bridge that gap, by looking at the role of language in two classic game theory games. By using set-ups that are well studied in the game theory literature, we had a rich body of work understanding how rational agents would play, and when linguistic coordination could be useful. 
 
@@ -55,7 +55,7 @@ We focused on two games from within the 2x2 game space: Prisoner's Dilemma (PD) 
 
 In Prisoner's Dilemma (Figure \ref{payoff-PD}), each player individually prefers the rewards they get from playing B to the rewards they get from playing A (holding the other player's action constant). However, the outcome from both playing A is better for each player than the outcome from both playing B. Thus, the Nash equilibrium, where no player can benefit from making a unilateral change in action is BB, and so game theorists expect rational agents playing a one-shot game of PD to each choose B. The prediction from game theory is that availability of communication should not change behavior in a PD games because it would be "cheap talk" -- there is no incentive to be truthful about one's planned action. 
 
-In Bach or Stravinsky (Figure \ref{payoff-BoS}), both players only receive rewards if they choose the same option. However, player X prefers the AA option and B prefers the BB option. Thus, there are two Nash equilibria, either AA or BB. In a one-shot game of BoS, there is no way for participants to break the symmetry. Communication is predicted to be potentially useful, if it allows participants to break this symmetry and agree on which cell to align on. 
+In Bach or Stravinsky (Figure \ref{payoff-BoS}), both players only receive rewards if they choose the same option. However, player X prefers the AA option and player Y prefers the BB option. Thus, there are two Nash equilibria, either AA or BB. In a one-shot game of BoS, there is no way for participants to break the symmetry. Communication is predicted to be potentially useful, if it allows participants to break this symmetry and agree on which cell to align on. 
 
 
 ```{r set-up, include=F}
@@ -191,8 +191,8 @@ We conducted a series of 5 real-time online experiments where pairs of participa
 
 ## Participants
 The number of participants included in each condition (after incomplete games were excluded) is shown in Table \ref{participants}. We recruited participants via Prolific and directed them to our website where they were paired up to play a game with another participant in real time. 
-## Procedure
 
+## Procedure
 All experiments were implemented in Empirica v1 [@almaatouq2021]. The experiment consisted first of consent and instruction. 
 
 Then participants were matched with their partner and given 3 minutes to freely chat with their partner using the chat box. This initial free-chat was intended to convince participants their partner really was human and not a bot (after high levels of pilot participants reported they thought they had been playing with a bot). A few potential prompts for conversation were given. Instructions for experiments 1-3 were: "You may have seen similar games where your partner is really a bot. This isn't one of those! You have been paired with another human participant who was also recruited from Prolific at the same time." In experiments 4 and 5, conducted after the widespread awareness of LLM chatbots like Chat-GPT, we became more explicit: "We are aware that there are similar games where your partner is a bot (or ChatGPT). *THIS IS NOT ONE OF THOSE.* We are cognitive scientists at a university, and our ethics approval (IRB) doesn't allow us to deceive participants. You have been paired with another participant who was also recruited from Prolific via the same task you were." 
@@ -201,9 +201,9 @@ Then participants were matched with their partner and given 3 minutes to freely 
 knitr::include_graphics("overview.png")
 ```
 
-After the three minutes, participants moved onto the main experiment.  On each trial, they saw a payout grid for differently colored treasure chests and were asked to click which chest they wanted to open (Figure \ref{ui}). Each pair completed 40 trials, with the payoffs dependent on the experiment condition (see below). Participants in the "chat" condition could message their partner freely during the trials using a chat interface; participants in the "no chat" condition did not have access to the chat during the main experiment. 
+After the three minutes, participants moved onto the main experiment.  On each trial, they saw a payout grid for differently colored treasure chests and were asked to click which chest they wanted to open (Figure \ref{ui}). Each pair completed 40 trials, with the payoffs dependent on the experiment condition (see below). Participants in the "chat" condition could message their partner freely during the trials using a chat interface; participants in the "no-chat" condition did not have access to the chat during the main experiment. 
 
-In experiments 1,2,3 and 5, participants saw a running bonus score for themselves and their partner, as their bonus payment was proportional to the sum of the rewards they earned. On experiment 4, participants were instead paid proportional to the results of 4 randomly selected trials, and were not shown a cumulative payoff score. 
+In experiments 1, 2, 3, and 5, participants saw a running bonus score for themselves and their partner, as their bonus payment was proportional to the sum of the rewards they earned. On experiment 4, participants were instead paid proportional to the results of 4 randomly selected trials, and were not shown a cumulative payoff score. 
 
 After the experiment, participants completed a survey about their experience, including their strategy and whether they thought they were playing with a real person, before seeing a debrief and being redirected back to Prolific to receive payment. 
 
@@ -222,7 +222,7 @@ total_n <- all_rounds |> select(gameId) |> unique() |> tally() |> mutate(n=2*n)
 ```
 
 ## Trial types 
-We sampled different types of trials across different experiments. For each trial type, we constructed trials by randomly sampling reward values subject to some constraints. Examples of each trial type are shown in Figure \ref{payoff-matrix}
+We sampled different types of trials across different experiments. For each trial type, we constructed trials by randomly sampling reward values subject to some constraints. Examples of each trial type are shown in Figure \ref{payoff-matrix}.
 
 **Normal PD** trials were created by sampling 3 values from 1-9 (without replacement) for the payoffs, with 0 always as the sucker payoff, with the preference order corresponding to PD structure.
 
@@ -251,7 +251,7 @@ During data analysis for experiment 2, we realized that we had mis-displayed the
 
 **Expt 3** (https://osf.io/c274z): Each game had a mix of easy PD, hard PD, normal BoS, and spike BoS trials.  Of the 40 trials, exactly 4, at pre-set locations in the trial order were spike BoS trials. Due to the higher stakes, we thought pairs might coordinate more on these trials. The other trials were sampled in a 16:10:10 ratio from normal BoS, easy PD, and hard PD for an overall roughly half BoS and half PD mixture. 
 
-**Expt 4** (https://osf.io/fymjc): In experiment 4, we aimed for a set-up that was closer to the predictions from game theory.We removed the points counter, given that participants in prior experiments sometimes used the visible money earned so far as a locus for coordination. We switched from providing a bonus proportional to the overall points earned to an incentive compatible bonus that sampled 4 trials at random and paid out those points. Because the games that mattered were unknown and randomly sampled, we reasoned that the rational strategy might be closer to the formal predictions of one-shot games. Trials were sampled from a 50/50 distribution of easy PD and normal BoS.
+**Expt 4** (https://osf.io/fymjc): In experiment 4, we aimed for a set-up that was closer to the predictions from game theory. We removed the points counter, given that participants in prior experiments sometimes used the visible money earned so far as a locus for coordination. We switched from providing a bonus proportional to the overall points earned to an incentive compatible bonus that sampled 4 trials at random and paid out those points. Because the games that mattered were unknown and randomly sampled, we reasoned that the rational strategy might be closer to the formal predictions of one-shot games. Trials were sampled from a 50/50 distribution of easy PD and normal BoS.
 
 **Expt 5** (https://osf.io/ksjmv): After a disappointing experiment 4, we returned to the design of experiment 3 and collected a larger sample. The condition distribution and incentive structure of experiment 5 was identical to experiment 3.
 
@@ -312,7 +312,7 @@ exit <- exit_1 |>
   bind_rows(exit_4) |>
   bind_rows(exit_5) |>
   select(expt, chat_cond, pct) |>
-  mutate(chat_cond = ifelse(chat_cond == "chat", "chat", "nochat"))
+  mutate(chat_cond = ifelse(chat_cond == "chat", "chat", "no-chat"))
 
 exit |>
   mutate(pct = round(pct * 100, 1)) |>
@@ -447,7 +447,7 @@ outcome %>%
   labs(y = "Good outcome?", x="Chat condition", color="")+
   theme(legend.position="bottom")
 ```
-For PD trials, there are three distinct outcomes. If both players cooperate, the outcome is AA and each gets a moderately high payoff. If both players defect, the outcome is BB, the Nash equilibrium, and each player get a low payoff. If one player cooperates and the other defects, the outcome is AB (or BA), and one player get a high payoff and the other gets 0. From a perspective of wefare-maximization, the selection with best total reward is AA in easy PD and AB/BA in hard PD. We expect normal PD to generally be the of the type easy PD; and again note that the errors in displaying off-diagonal rewards would primarily affect hard PD type trials, where off diagonal options are more attractive. The rates of selecting each of the three outcome options by experiment and conditions are shown in Figure \ref{pdquad}. 
+For PD trials, there are three distinct outcomes. If both players cooperate, the outcome is AA and each gets a moderately high payoff. If both players defect, the outcome is BB, the Nash equilibrium, and each player gets a low payoff. If one player cooperates and the other defects, the outcome is AB (or BA), and one player gets a high payoff and the other gets 0. From a perspective of wefare-maximization, the selection with best total reward is AA in easy PD and AB/BA in hard PD. We expect normal PD to generally be the of the type easy PD; and again note that the errors in displaying off-diagonal rewards would primarily affect hard PD type trials, where off diagonal options are more attractive. The rates of selecting each of the three outcome options by experiment and conditions are shown in Figure \ref{pdquad}. 
 
 ```{r , fig.cap="For PD trials, how frequently pairs made selections that results in each type of outcome. AA is the cooperate outcome, AB/BA is mixed -- one cooperate, one defect, BB is both defect. \\label{pdquad} ", fig.height=5, fig.width=8}
 outcome %>%
@@ -471,7 +471,7 @@ In hard PD trials, AA selections were less common than in easy PD trials (`r sta
 
 In parallel, the rate of AB/BA selections was increased by a hard PD x chat interaction (`r stats_text(PD_unneven, 5)`), consistent with the idea that from a total points perspective, this is the best outcome for hard PD, but requires more complex coordination to achieve. 
 
-Overall, the results based on condition assignment are consistent with the prediction that language would be more beneficial for BoS than for PD. However, condition differences were small and often noisy (presumably due to low update of using language), and so the experiments do not provide compelling evidence. Additionally, the analytic import of using well-studied game theory scenarios with predictions about the utility of language is weakened by the inconsistency between predicted behaviors in the PD condition and actual selections. 
+Overall, the results based on condition assignment are consistent with the prediction that language would be more beneficial for BoS than for PD. However, condition differences were small and often noisy (presumably due to low uptake of using language), and so the experiments do not provide compelling evidence. Additionally, the analytic import of using well-studied game theory scenarios with predictions about the utility of language is weakened by the inconsistency between predicted behaviors in the PD condition and actual selections. 
 
 ## Uptake results
 
@@ -481,13 +481,13 @@ We note that a pairs' choice to use language is not assigned and thus that the o
 ```{r}
 outcome_chatted <- outcome |> 
   mutate(chatted = case_when(
-    chat_cond =="nochat" ~ "nochat",
+    chat_cond =="nochat" ~ "no-chat",
     is_chat == 1 ~ "chatty",
     is_chat == 0 ~ "quiet"
-  ) |> factor(levels=c("chatty", "quiet", "nochat")))
+  ) |> factor(levels=c("chatty", "quiet", "no-chat")))
 ```
 
-We repeat the quadrant analyses, now with a three-way split between "chatty" games who used the chat on the given trial, "quiet" games who were in the chat condition, but produced no chat messages on the given trial, and "nochat" games were assigned to the no chat condition. 
+We repeat the quadrant analyses, now with a three-way split between "chatty" games who used the chat on the given trial, "quiet" games who were in the chat condition, but produced no chat messages on the given trial, and "no-chat" games were assigned to the no-chat condition. 
 
 ```{r, fig.cap="For BoS trials, how frequently pairs made coordinated selections that recieved rewards as a function of whether chat was available or used that trial. \\label{bosquad-uptake} ", fig.height=3, fig.width=8}
 outcome_chatted %>%
@@ -502,7 +502,7 @@ outcome_chatted %>%
   labs(y = "Good outcome?", x="Chat usage on trial", color="")+
   theme(legend.position="bottom")
 ```
-For BoS results, shown in Figure \ref{bosquad-uptake}, chatty trials had the best outcomes, with high levels of aligning. Depending on experiment, quiet trials generally patterned with the nochat condition, expect in the first experiment that was entirely BoS. Thus, it appears that there may be slight benefits to chatting that spill over onto other trials, perhaps via setting up conventions for determining what strategy to use to break the symmetry. Strategy set-up may be easiest when the trials are most homogeneous. However, most of the overall slight benefits associated with the chat condition are being driven by the small number of games and trials that used the chat. 
+For BoS results, shown in Figure \ref{bosquad-uptake}, chatty trials had the best outcomes, with high levels of aligning. Depending on experiment, quiet trials generally patterned with the no-chat condition, except in the first experiment that was entirely BoS. Thus, it appears that there may be slight benefits to chatting that spill over onto other trials, perhaps via setting up conventions for determining what strategy to use to break the symmetry. Strategy set-up may be easiest when the trials are most homogeneous. However, most of the overall slight benefits associated with the chat condition are being driven by the small number of games and trials that used the chat. 
 
 
 ```{r, fig.cap="For PD trials, how frequently pairs made selections that results in each type of outcome as a function of chat availability and usage on each trial. AA is the cooperate outcome, AB/BA is mixed -- one cooperate, one defect, BB is both defect. \\label{pdquad} ", fig.height=5, fig.width=8}
@@ -522,9 +522,9 @@ outcome_chatted %>%
   theme(legend.position="bottom")
 ```
 
-We similarly break down the PD results in terms of language use per trial in Figure \ref{pdquad}. Trials that used chat were slightly more consistent at selecting the cooperate option on easy and normal PD (although this in particular could reflect selection effects for careful or attentive participants). The larger difference in selections between trials that used chat and those that did not was on the hard PD trials where selection of the AB/BA option appears to be primarily driven by chat-usage. 
+We similarly break down the PD results in terms of language use per trial in Figure \ref{pdquad}. Trials that used chat were slightly more consistent at selecting the cooperate option on easy and normal PD (although this in particular could reflect selection effects for careful or attentive participants). The larger difference in selections between trials that used chat and those that did not was on the hard PD trials where selection of the AB/BA option appears to be primarily driven by chat usage. 
 
-Overall, the slight differences observed in the chat condition and nochat conditions appear to primarily come from the relatively small number of trials that actually used the chat while quiet trials generally patterned with behavior from the nochat condition. 
+Overall, the slight differences observed in the chat condition and no-chat conditions appear to primarily come from the relatively small number of trials that actually used the chat while quiet trials generally patterned with behavior from the no-chat condition. 
 
 ## Use of language 
 
@@ -553,7 +553,7 @@ Between the chat logs and the post game strategy notes, some longer-run strategi
 
 Our intention with this line of research was to bridge between the literature on linguistic coordination and referential language use in reference games with the literature on strategic games and the value of communication from game theory. We tested how people would use a linguistic communication channel while playing a series of 2x2 strategic games with a partner, and how the outcomes of these 2x2 games would vary between people with the communication channel and those without. 
 
-Despite low levels of use of the communication channel, we found slight differences in outcome between the chat and nochat groups, where pairs who could communicate were slightly more likely to reach coordinated beneficial outcomes in BoS games and slightly more likely to choose welfare-maximizing unequal outcomes in hard PD games. In contrast to the predictions of rational actors, participants in both chat and no-chat conditions generally aligned on both cooperating rather than both defecting in PD. The tendency to cooperate has previously been observed in experiments with repeated PD-style games [@rand2013]. Overall, we were limited in our ability to discern the role of communication channels due to low uptake in using the communication channels when available. 
+Despite low levels of use of the communication channel, we found slight differences in outcome between the chat and no-chat groups, where pairs who could communicate were slightly more likely to reach coordinated beneficial outcomes in BoS games and slightly more likely to choose welfare-maximizing unequal outcomes in hard PD games. In contrast to the predictions of rational actors, participants in both chat and no-chat conditions generally aligned on both cooperating rather than both defecting in PD. The tendency to cooperate has previously been observed in experiments with repeated PD-style games [@rand2013]. Overall, we were limited in our ability to discern the role of communication channels due to low uptake in using the communication channels when available. 
 
 Despite our desire to use game-theory aligned paradigms for the analytic theory and predictions, the experimental paradigm contained several design factors that misalign with the assumptions of the analytic theory. 
 
@@ -563,7 +563,7 @@ Despite our desire to use game-theory aligned paradigms for the analytic theory 
 
 3. The repeated nature of the game, mix of trial types, and extra information such as running score allowed for coordination around alternating or evening out scores in the long run in ways not available in the base single-shot games. 
 
-In conclusion, we still think there are interesting questions about how communication, and linguistic communication in particular, might affect what strategies around coordination and competition can be used in strategic games. Coming from the perspective of convention formation in reference games, we are still interested in when and how people can form procedural or "meta" conventions around how to negotiate with each other rather than just around referents. However, over the course of these experiments, we have learned that there are methodological and implementational barriers. We were able to mostly overcome initial issue with participants thinking they were playing with bots by adding an initial short free chat between each partnership. However, we were not able to overcome other problems. We had difficulties finding tasks that have tractable theoretical predictions but are also sufficiently engaging that humans will take them seriously, and compromised on a design that was not ideal from either perspective. Additionally, while we previously had no problems getting participants to use linguistic communication in online chat-box mediated tasks where the goal was reference [@boyce2024], we had difficulty getting participants to use chat in strategic contexts [both here and in @mankewitz2021]. 
+In conclusion, we still think there are interesting questions about how communication, and linguistic communication in particular, might affect what strategies around coordination and competition can be used in strategic games. Coming from the perspective of convention formation in reference games, we are still interested in when and how people can form procedural or "meta" conventions around how to negotiate with each other rather than just around referents. However, over the course of these experiments, we have learned that there are methodological and implementational barriers. We were able to mostly overcome the initial issue with participants thinking they were playing with bots by adding an initial short free chat between each partnership. However, we were not able to overcome other problems. We had difficulties finding tasks that have tractable theoretical predictions but are also sufficiently engaging that humans will take them seriously, and compromised on a design that was not ideal from either perspective. Additionally, while we previously had no problems getting participants to use linguistic communication in online chat-box mediated tasks where the goal was reference [@boyce2024], we had difficulty getting participants to use chat in strategic contexts [both here and in @mankewitz2021]. 
 
 It is possible that other research teams could design experiments, recruitment contexts, interaction contexts, or instructions that produce different baseline preferences around the use of communication, and could lead to more successful uptake of communication channel manipulations. We hope this is true, as we think the research questions are interesting. 
 
