@@ -1,17 +1,12 @@
 
-This is an experiment powered by
-[Empirica](https://empirica.ly/) (here is a basic
-[tutorial](https://www.youtube.com/watch?v=K2YhEZey_58&list=PLPQelvUwyVgiawBDk3Sp74QMfL8RPgORW&index=1)).
+# Experiments on the use of language in 2x2 game theory games
 
-## Testing
+## Repo structure
 
-To develop locally, 
+experiments -- code to run the experiments in Empirica v1. It's set up for the most recent experiment, but functions to run older experiments are present. 
 
-1. make sure you [have meteor installed](https://www.meteor.com/install), 
-2. clone the repo, and run `meteor npm install` to get the dependencies
-3. launch locally with `meteor --settings local.json` (the default admin password is `password` -- change this in `local.json`.
-4. go to `http://localhost:3000/admin` in your browser
+data -- raw and slightly processed data for each experiment
 
-## Guide to repo organization
-- experiments: code and stuff to run experiments
+code -- pre-processing and analysis code 
 
+manuscript -- the analyses shown in the manuscript are created within this folder. This uses the raw_chat and raw_results files in data/ created by files in code, but is otherwise self-contained. Also contains the reproducible manuscript. 
